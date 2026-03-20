@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vantage — Healthcare Capital Decision Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --scarlet:#BB0000; --scarlet-dk:#8B0000; --scarlet-lt:#d63030; --scarlet-pale:#fdf0f0;
+  --gray-900:#1a1a1a; --gray-800:#2d2d2d; --gray-700:#444; --gray-600:#666;
+  --gray-400:#999; --gray-300:#bbb; --gray-200:#e0e0e0; --gray-100:#f2f2f2; --gray-50:#f8f8f8;
+  --white:#fff; --success:#1a6b3c; --success-lt:#e8f5ee; --border:#ddd;
+  --shadow-sm:0 1px 4px rgba(0,0,0,.08); --shadow-md:0 4px 16px rgba(0,0,0,.10); --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--gray-100);color:var(--gray-900);min-height:100vh;font-size:14px;}
+
+/* HEADER */
+.header{background:var(--gray-900);padding:0 32px;border-bottom:4px solid var(--scarlet);position:sticky;top:0;z-index:100;}
+.header-inner{max-width:1500px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px;}
+.wordmark{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;letter-spacing:.06em;color:var(--white);text-transform:uppercase;}
+.wordmark span{color:var(--scarlet-lt);}
+.sl-tabs{display:flex;align-items:center;gap:2px;height:100%;}
+.sl-tab{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-400);background:none;border:none;cursor:pointer;padding:0 14px;height:100%;border-bottom:4px solid transparent;margin-bottom:-4px;transition:color .15s,border-color .15s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.sl-tab:hover{color:var(--gray-200);}
+.sl-tab.active{color:var(--white);border-bottom-color:var(--scarlet-lt);}
+.sl-tab .dot{width:6px;height:6px;border-radius:50%;background:var(--gray-600);flex-shrink:0;transition:background .15s;}
+.sl-tab.active .dot{background:var(--scarlet-lt);}
+.add-sl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-400);background:none;border:1px dashed var(--gray-700);border-radius:4px;padding:4px 10px;cursor:pointer;margin-left:6px;transition:color .15s,border-color .15s;}
+.add-sl:hover{color:var(--white);border-color:var(--gray-400);}
+
+/* NAV TABS inside tool */
+.tool-nav{background:var(--gray-800);display:flex;border-bottom:1px solid var(--gray-700);}
+.tool-tab{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-400);background:none;border:none;cursor:pointer;padding:10px 20px;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;}
+.tool-tab:hover{color:var(--gray-200);}
+.tool-tab.active{color:var(--white);border-bottom-color:var(--scarlet);}
+
+/* LAYOUT */
+.main{max-width:1500px;margin:0 auto;padding:20px 32px;display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;}
+
+/* PANEL */
+.panel{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-sm);}
+.panel-banner{background:var(--scarlet);color:white;padding:10px 16px;border-radius:var(--r) var(--r) 0 0;}
+.panel-banner-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+.panel-banner-sub{font-size:10px;opacity:.75;margin-top:1px;}
+.panel-scroll{overflow-y:auto;max-height:calc(100vh - 160px);}
+.panel-scroll::-webkit-scrollbar{width:3px;}
+.panel-scroll::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:2px;}
+
+.sec-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--white);background:var(--gray-700);padding:5px 14px;}
+.ig{padding:7px 14px 3px;}
+.ig label{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--gray-700);font-weight:500;margin-bottom:3px;}
+.ig label .conf{font-size:9px;color:var(--success);font-weight:700;}
+.sr{display:flex;align-items:center;gap:6px;}
+.sr input[type=range]{flex:1;accent-color:var(--scarlet);height:3px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right,var(--scarlet) 0%,var(--scarlet) var(--pct,50%),var(--gray-200) var(--pct,50%));border-radius:2px;outline:none;}
+.sr input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--scarlet);border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:pointer;}
+.vb{font-family:'Barlow Condensed',monospace;font-size:12px;font-weight:600;color:var(--gray-900);background:var(--gray-100);border:1px solid var(--border);padding:2px 6px;border-radius:3px;min-width:68px;text-align:right;white-space:nowrap;}
+.note{font-size:9px;color:var(--gray-400);margin-top:1px;font-style:italic;line-height:1.3;}
+
+/* RESULTS */
+.results{display:flex;flex-direction:column;gap:16px;}
+
+/* KPIs */
+.kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi-reno::after{background:var(--gray-700);}
+.kpi-new::after{background:var(--scarlet);}
+.kpi-sq::after{background:var(--gray-400);}
+.kpi-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;}
+.kpi-reno .kpi-lbl{color:var(--gray-700);}
+.kpi-new .kpi-lbl{color:var(--scarlet);}
+.kpi-sq .kpi-lbl{color:var(--gray-400);}
+.kpi-npv{font-family:'Playfair Display',serif;font-size:26px;line-height:1;letter-spacing:-.5px;}
+.kpi-npv.pos{color:var(--success);}
+.kpi-npv.neg{color:var(--scarlet-dk);}
+.kpi-sub{font-size:9px;color:var(--gray-400);margin-top:2px;text-transform:uppercase;letter-spacing:.07em;}
+.kpi-stats{display:flex;gap:0;margin-top:10px;padding-top:10px;border-top:1px solid var(--gray-200);}
+.kpi-stat{flex:1;padding:0 6px;border-right:1px solid var(--gray-200);}
+.kpi-stat:first-child{padding-left:0;}
+.kpi-stat:last-child{border-right:none;}
+.kpi-stat-l{font-size:8px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;}
+.kpi-stat-v{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;color:var(--gray-900);margin-top:1px;}
+
+/* COST BUILDUP CARD */
+.buildup-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden;}
+.card-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray-900);}
+.card-sub{font-size:10px;color:var(--gray-400);}
+
+.buildup-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.buildup-col{border-right:1px solid var(--border);}
+.buildup-col:last-child{border-right:none;}
+.buildup-col-hdr{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;border-bottom:1px solid var(--border);}
+.buildup-col:first-child .buildup-col-hdr{color:var(--gray-700);background:var(--gray-100);}
+.buildup-col:last-child .buildup-col-hdr{color:var(--scarlet-dk);background:var(--scarlet-pale);}
+
+.buildup-row{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;border-bottom:1px solid var(--gray-100);}
+.buildup-row.subtotal{background:var(--gray-50);border-top:1px solid var(--border);}
+.buildup-row.total{background:var(--gray-900);}
+.buildup-row.total .bl{color:var(--white);font-weight:700;}
+.buildup-row.total .bv{color:var(--white);font-weight:700;}
+.buildup-row.note-row{background:#fff8e6;border-left:3px solid #f0a500;}
+.bl{font-size:11px;color:var(--gray-700);}
+.bl-note{font-size:10px;color:var(--gray-400);font-style:italic;}
+.bv{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--gray-900);}
+.bv.highlight{color:var(--scarlet-dk);}
+.buildup-formula{font-size:9px;color:var(--gray-400);font-family:'Barlow Condensed',monospace;margin-top:1px;}
+
+/* SPACE PROGRAM TABLE */
+.sp-table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{background:var(--gray-900);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 10px;text-align:right;}
+thead th:first-child{text-align:left;min-width:160px;}
+thead th:nth-child(2){text-align:center;}
+tbody tr:nth-child(even){background:var(--gray-50);}
+tbody tr:hover{background:var(--scarlet-pale);}
+td{padding:7px 10px;border-bottom:1px solid var(--gray-200);text-align:right;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--gray-700);}
+td:first-child{text-align:left;font-family:'Barlow',sans-serif;font-size:11px;color:var(--gray-600);font-weight:500;}
+td:nth-child(2){text-align:center;}
+td input[type=number]{width:54px;padding:2px 4px;border:1px solid var(--border);border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-size:12px;text-align:center;color:var(--gray-900);background:var(--scarlet-pale);}
+td input[type=number]:focus{outline:none;border-color:var(--scarlet);}
+tr.sp-subtotal td{background:var(--gray-100);font-weight:700;color:var(--gray-900);}
+tr.sp-total td{background:var(--gray-900);color:var(--white);font-weight:700;font-family:'Barlow Condensed',sans-serif;font-size:13px;}
+tr.sp-group td{background:var(--gray-800);color:var(--gray-300);font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;}
+
+/* CHART */
+.chart-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-sm);}
+.chart-body{padding:16px;}
+.chart-wrap{height:200px;position:relative;}
+.legend{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--gray-600);font-weight:500;}
+.leg-line{width:18px;height:3px;border-radius:2px;}
+
+/* CF TABLE */
+.cf-table-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden;}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.25);width:400px;max-width:95vw;overflow:hidden;}
+.modal-hd{background:var(--scarlet);color:white;padding:14px 18px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;}
+.modal-x{background:none;border:none;color:white;font-size:20px;cursor:pointer;line-height:1;}
+.modal-body{padding:18px;}
+.modal-body label{font-size:11px;font-weight:600;color:var(--gray-700);display:block;margin-bottom:3px;margin-top:10px;}
+.modal-body label:first-of-type{margin-top:0;}
+.modal-body input,.modal-body select{width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:4px;font-family:'Barlow',sans-serif;font-size:12px;color:var(--gray-900);outline:none;}
+.modal-body input:focus{border-color:var(--scarlet);}
+.preset-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:4px;}
+.preset-btn{padding:7px 9px;border:1px solid var(--border);border-radius:4px;background:var(--gray-50);font-family:'Barlow',sans-serif;font-size:11px;cursor:pointer;text-align:left;transition:border-color .1s,background .1s;}
+.preset-btn:hover,.preset-btn.sel{border-color:var(--scarlet);background:var(--scarlet-pale);}
+.preset-btn strong{display:block;color:var(--gray-900);font-weight:600;}
+.preset-btn span{color:var(--gray-400);font-size:10px;}
+.modal-ft{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+.btn{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:7px 16px;border-radius:4px;border:none;cursor:pointer;}
+.btn-cancel{background:var(--gray-100);color:var(--gray-700);}
+.btn-add{background:var(--scarlet);color:white;}
+.btn-add:hover{background:var(--scarlet-dk);}
+
+/* hidden panels */
+.view{display:none;}
+.view.active{display:contents;}
+
+@media(max-width:960px){
+  .main{grid-template-columns:1fr;padding:12px;}
+  .panel{position:static;}
+  .kpi-strip{grid-template-columns:1fr;}
+  .buildup-grid{grid-template-columns:1fr;}
+  .header{padding:0 16px;}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="wordmark">Vantage<span>.</span></div>
+    <div class="sl-tabs" id="sl-tabs">
+      <button class="add-sl" onclick="openModal()">+ Service Line</button>
+    </div>
+  </div>
+</header>
+
+<div style="max-width:1500px;margin:0 auto;">
+  <div class="tool-nav">
+    <button class="tool-tab active" onclick="switchView('space',this)">Space Program</button>
+    <button class="tool-tab" onclick="switchView('finance',this)">Financial Model</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ── LEFT PANEL ── -->
+  <aside class="panel" style="position:sticky;top:76px;">
+    <div class="panel-banner">
+      <div class="panel-banner-name" id="sl-name">Neurological Oncology</div>
+      <div class="panel-banner-sub">Adjust values — all outputs update instantly</div>
+    </div>
+    <div class="panel-scroll">
+
+      <!-- SPACE VIEW INPUTS -->
+      <div id="left-space">
+        <div class="sec-lbl">Construction Costs</div>
+        <div class="ig">
+          <label>Reno cost / SF <span id="v_reno_sf" class="vb">$450</span></label>
+          <div class="sr"><input type="range" id="reno_sf" min="250" max="750" step="10" value="450" oninput="slide(this,'v_reno_sf',v=>'$'+v)"></div>
+          <div class="note">Major healthcare reno benchmark $400–500/SF (Gordian 2024)</div>
+        </div>
+        <div class="ig">
+          <label>New build cost / SF <span id="v_new_sf" class="vb">$620</span></label>
+          <div class="sr"><input type="range" id="new_sf" min="350" max="900" step="10" value="620" oninput="slide(this,'v_new_sf',v=>'$'+v)"></div>
+          <div class="note">Healthcare new build benchmark $575–675/SF mid-market</div>
+        </div>
+
+        <div class="sec-lbl">Soft Costs (% of hard cost)</div>
+        <div class="ig">
+          <label>Architecture & engineering <span id="v_ae" class="vb">10%</span></label>
+          <div class="sr"><input type="range" id="sc_ae" min="5" max="18" step="0.5" value="10" oninput="slide(this,'v_ae',v=>v+'%')"></div>
+        </div>
+        <div class="ig">
+          <label>Owner's project management <span id="v_pm" class="vb">3%</span></label>
+          <div class="sr"><input type="range" id="sc_pm" min="1" max="6" step="0.5" value="3" oninput="slide(this,'v_pm',v=>v+'%')"></div>
+        </div>
+        <div class="ig">
+          <label>Permits, testing & inspections <span id="v_perm" class="vb">1.5%</span></label>
+          <div class="sr"><input type="range" id="sc_perm" min="0.5" max="4" step="0.25" value="1.5" oninput="slide(this,'v_perm',v=>v+'%')"></div>
+        </div>
+        <div class="ig">
+          <label>FF&E (furniture, fixtures, equip.) <span id="v_ffe" class="vb">5%</span></label>
+          <div class="sr"><input type="range" id="sc_ffe" min="2" max="10" step="0.5" value="5" oninput="slide(this,'v_ffe',v=>v+'%')"></div>
+        </div>
+        <div class="ig">
+          <label>IT / AV / infrastructure <span id="v_it" class="vb">2.5%</span></label>
+          <div class="sr"><input type="range" id="sc_it" min="1" max="6" step="0.25" value="2.5" oninput="slide(this,'v_it',v=>v+'%')"></div>
+        </div>
+        <div class="ig">
+          <label>Owner's contingency (soft) <span id="v_oc" class="vb">2%</span></label>
+          <div class="sr"><input type="range" id="sc_oc" min="0" max="5" step="0.25" value="2" oninput="slide(this,'v_oc',v=>v+'%')"></div>
+        </div>
+
+        <div class="sec-lbl">Construction Contingency</div>
+        <div class="ig">
+          <label>Renovation contingency <span id="v_reno_cont" class="vb">10%</span></label>
+          <div class="sr"><input type="range" id="reno_cont" min="3" max="25" step="0.5" value="10" oninput="slide(this,'v_reno_cont',v=>v+'%')"></div>
+          <div class="note">Higher for reno — unknown conditions, phasing risk</div>
+        </div>
+        <div class="ig">
+          <label>New build contingency <span id="v_new_cont" class="vb">8%</span></label>
+          <div class="sr"><input type="range" id="new_cont" min="3" max="20" step="0.5" value="8" oninput="slide(this,'v_new_cont',v=>v+'%')"></div>
+          <div class="note">Lower — cleaner scope once schematic design is set</div>
+        </div>
+
+        <div class="sec-lbl">Grossing Factor</div>
+        <div class="ig">
+          <label>Net-to-gross multiplier <span id="v_gross" class="vb">1.32x</span></label>
+          <div class="sr"><input type="range" id="gross_factor" min="1.1" max="1.6" step="0.01" value="1.32" oninput="slide(this,'v_gross',v=>parseFloat(v).toFixed(2)+'x')"></div>
+          <div class="note">Corridors, walls, mechanical, interstitial. Typical 1.28–1.40x for clinical</div>
+        </div>
+      </div>
+
+      <!-- FINANCE VIEW INPUTS -->
+      <div id="left-finance" style="display:none;">
+        <div class="sec-lbl">Revenue</div>
+        <div class="ig">
+          <label>Current annual net revenue <span id="v_base_rev" class="vb">$5.2M</span></label>
+          <div class="sr"><input type="range" id="base_rev" min="1" max="20" step="0.1" value="5.2" oninput="slide(this,'v_base_rev',v=>'$'+parseFloat(v).toFixed(1)+'M')"></div>
+        </div>
+        <div class="ig">
+          <label>Incremental rev — reno (Yr 3+) <span id="v_reno_ir" class="vb">$2.4M</span></label>
+          <div class="sr"><input type="range" id="reno_ir" min="0" max="12" step="0.1" value="2.4" oninput="slide(this,'v_reno_ir',v=>'$'+parseFloat(v).toFixed(1)+'M')"></div>
+        </div>
+        <div class="ig">
+          <label>Incremental rev — new build (Yr 3+) <span id="v_new_ir" class="vb">$4.8M</span></label>
+          <div class="sr"><input type="range" id="new_ir" min="0" max="16" step="0.1" value="4.8" oninput="slide(this,'v_new_ir',v=>'$'+parseFloat(v).toFixed(1)+'M')"></div>
+        </div>
+        <div class="ig">
+          <label>Annual revenue growth rate <span id="v_rev_gr" class="vb">5.5%</span></label>
+          <div class="sr"><input type="range" id="rev_gr" min="0" max="12" step="0.25" value="5.5" oninput="slide(this,'v_rev_gr',v=>parseFloat(v).toFixed(1)+'%')"></div>
+        </div>
+        <div class="sec-lbl">Operating Costs</div>
+        <div class="ig">
+          <label>Annual opex — renovation <span id="v_reno_opex" class="vb">$3.2M</span></label>
+          <div class="sr"><input type="range" id="reno_opex" min="0.5" max="12" step="0.1" value="3.2" oninput="slide(this,'v_reno_opex',v=>'$'+parseFloat(v).toFixed(1)+'M')"></div>
+        </div>
+        <div class="ig">
+          <label>Annual opex — new build <span id="v_new_opex" class="vb">$2.6M</span></label>
+          <div class="sr"><input type="range" id="new_opex" min="0.5" max="12" step="0.1" value="2.6" oninput="slide(this,'v_new_opex',v=>'$'+parseFloat(v).toFixed(1)+'M')"></div>
+        </div>
+        <div class="ig">
+          <label>Annual opex — status quo <span id="v_sq_opex" class="vb">$3.8M</span></label>
+          <div class="sr"><input type="range" id="sq_opex" min="0.5" max="14" step="0.1" value="3.8" oninput="slide(this,'v_sq_opex',v=>'$'+parseFloat(v).toFixed(1)+'M')"></div>
+        </div>
+        <div class="ig">
+          <label>Compliance / regulatory risk <span id="v_comply" class="vb">$0.35M</span></label>
+          <div class="sr"><input type="range" id="comply" min="0" max="3" step="0.05" value="0.35" oninput="slide(this,'v_comply',v=>'$'+parseFloat(v).toFixed(2)+'M')"></div>
+        </div>
+        <div class="ig">
+          <label>Deferred maint. load <span class="conf">✓ confirmed</span><span id="v_defer" class="vb">$20M</span></label>
+          <div class="sr"><input type="range" id="defer" min="1" max="60" step="0.5" value="20" oninput="slide(this,'v_defer',v=>'$'+parseFloat(v).toFixed(1)+'M')"></div>
+          <div class="note">Annual run rate = 11% of total</div>
+        </div>
+        <div class="sec-lbl">Financial Parameters</div>
+        <div class="ig">
+          <label>Discount rate (WACC) <span id="v_wacc" class="vb">6.5%</span></label>
+          <div class="sr"><input type="range" id="wacc" min="2" max="14" step="0.25" value="6.5" oninput="slide(this,'v_wacc',v=>parseFloat(v).toFixed(2)+'%')"></div>
+        </div>
+        <div class="ig">
+          <label>Model horizon <span id="v_horizon" class="vb">10 yrs</span></label>
+          <div class="sr"><input type="range" id="horizon" min="5" max="30" step="5" value="10" oninput="slide(this,'v_horizon',v=>v+' yrs')"></div>
+        </div>
+        <div class="ig">
+          <label>Ramp-up to full volume <span id="v_ramp" class="vb">3 yrs</span></label>
+          <div class="sr"><input type="range" id="ramp" min="1" max="6" step="1" value="3" oninput="slide(this,'v_ramp',v=>v+' yrs')"></div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ── RIGHT RESULTS ── -->
+  <section class="results">
+
+    <!-- SPACE PROGRAM VIEW -->
+    <div id="view-space" class="view active">
+
+      <!-- Space program table -->
+      <div class="buildup-card">
+        <div class="card-hdr">
+          <div class="card-title">Space Program</div>
+          <div class="card-sub">Enter room counts — SF and cost calculated automatically</div>
+        </div>
+        <div class="sp-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Room / Space Type</th>
+                <th>Count</th>
+                <th>Net SF / unit</th>
+                <th>Net NASF</th>
+                <th>FGI basis</th>
+              </tr>
+            </thead>
+            <tbody id="sp-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Cost buildup -->
+      <div class="buildup-card">
+        <div class="card-hdr">
+          <div class="card-title">Cost Buildup — Transparent Math</div>
+          <div class="card-sub">Every line is derived · Nothing assumed as a lump sum</div>
+        </div>
+        <div class="buildup-grid">
+          <div class="buildup-col">
+            <div class="buildup-col-hdr">Renovation</div>
+            <div id="buildup-reno"></div>
+          </div>
+          <div class="buildup-col">
+            <div class="buildup-col-hdr">New Build</div>
+            <div id="buildup-new"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FINANCIAL MODEL VIEW -->
+    <div id="view-finance" class="view">
+
+      <!-- Capex source notice -->
+      <div style="background:var(--success-lt);border:1px solid #a3d9b8;border-radius:var(--r);padding:10px 16px;font-size:11px;color:var(--success);display:flex;align-items:center;gap:8px;">
+        <strong style="font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.06em;text-transform:uppercase;">Capex derived from space program</strong>
+        — not a manual input. Change room counts or $/SF on the Space Program tab to update.
+        <span id="capex-notice" style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;white-space:nowrap;"></span>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-strip">
+        <div class="kpi kpi-reno">
+          <div class="kpi-lbl">Renovation</div>
+          <div class="kpi-npv" id="kpi-reno-npv">—</div>
+          <div class="kpi-sub">Net Present Value</div>
+          <div class="kpi-stats">
+            <div class="kpi-stat"><div class="kpi-stat-l">IRR</div><div class="kpi-stat-v" id="kpi-reno-irr">—</div></div>
+            <div class="kpi-stat"><div class="kpi-stat-l">Payback</div><div class="kpi-stat-v" id="kpi-reno-pb">—</div></div>
+            <div class="kpi-stat"><div class="kpi-stat-l">ROI</div><div class="kpi-stat-v" id="kpi-reno-roi">—</div></div>
+          </div>
+        </div>
+        <div class="kpi kpi-new">
+          <div class="kpi-lbl">New Build</div>
+          <div class="kpi-npv" id="kpi-new-npv">—</div>
+          <div class="kpi-sub">Net Present Value</div>
+          <div class="kpi-stats">
+            <div class="kpi-stat"><div class="kpi-stat-l">IRR</div><div class="kpi-stat-v" id="kpi-new-irr">—</div></div>
+            <div class="kpi-stat"><div class="kpi-stat-l">Payback</div><div class="kpi-stat-v" id="kpi-new-pb">—</div></div>
+            <div class="kpi-stat"><div class="kpi-stat-l">ROI</div><div class="kpi-stat-v" id="kpi-new-roi">—</div></div>
+          </div>
+        </div>
+        <div class="kpi kpi-sq">
+          <div class="kpi-lbl">Status Quo — cost burden</div>
+          <div class="kpi-npv neg" id="kpi-sq-npv">—</div>
+          <div class="kpi-sub">NPV of doing nothing</div>
+          <div class="kpi-stats">
+            <div class="kpi-stat"><div class="kpi-stat-l">Ann. burden</div><div class="kpi-stat-v" id="kpi-sq-ann">—</div></div>
+            <div class="kpi-stat"><div class="kpi-stat-l">vs Reno Δ</div><div class="kpi-stat-v" id="kpi-sq-dr">—</div></div>
+            <div class="kpi-stat"><div class="kpi-stat-l">vs New Δ</div><div class="kpi-stat-v" id="kpi-sq-dn">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="chart-card">
+        <div class="card-hdr"><div class="card-title">Cumulative Net Cash Flow</div><div class="card-sub">$M · all scenarios</div></div>
+        <div class="chart-body">
+          <div class="chart-wrap"><canvas id="cfChart"></canvas></div>
+          <div class="legend">
+            <div class="leg-item"><div class="leg-line" style="background:var(--gray-700)"></div>Renovation</div>
+            <div class="leg-item"><div class="leg-line" style="background:var(--scarlet)"></div>New Build</div>
+            <div class="leg-item"><div class="leg-line" style="background:var(--gray-300)"></div>Status Quo</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CF table -->
+      <div class="cf-table-card">
+        <div class="card-hdr"><div class="card-title">Annual Cash Flow Detail</div><div class="card-sub">$M</div></div>
+        <div style="overflow-x:auto"><table><thead><tr id="cf-head"></tr></thead><tbody id="cf-body"></tbody></table></div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="modal-hd">Add Service Line <button class="modal-x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <p style="font-size:11px;color:var(--gray-400);margin-bottom:12px;">Pick a preset or enter custom assumptions. All editable after adding.</p>
+      <label>Start from preset</label>
+      <div class="preset-grid" id="preset-grid"></div>
+      <label style="margin-top:14px;">Service line name</label>
+      <input type="text" id="new-sl-name" placeholder="e.g. Cardiovascular, Orthopedics…">
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-add" onclick="addSL()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ─── SPACE PROGRAM ROOM DEFINITIONS ──────────────────────────────────────────
+// Each service line has its own room list. net_sf = net assignable SF per unit.
+// fgi = FGI guideline reference note shown to user.
+const ROOM_DEFS = {
+  "Neurological Oncology": [
+    { group:"Clinical", name:"Exam / consult room",          net_sf:120, count:12, fgi:"FGI 2022 §3.1-3.2.1" },
+    { group:"Clinical", name:"Infusion chair bay",           net_sf:130, count:20, fgi:"FGI 2022 §3.7-3.1" },
+    { group:"Clinical", name:"Procedure room",               net_sf:180, count:2,  fgi:"FGI 2022 §3.1-3.4" },
+    { group:"Clinical", name:"Nurse station / team station", net_sf:120, count:2,  fgi:"FGI 2022 §3.1-7.2" },
+    { group:"Clinical", name:"Provider team room / office",  net_sf:120, count:4,  fgi:"FGI 2022 §3.1-7.3" },
+    { group:"Support",  name:"Clean utility room",           net_sf:100, count:2,  fgi:"FGI 2022 §3.1-5.1" },
+    { group:"Support",  name:"Soiled utility / holding",     net_sf:80,  count:2,  fgi:"FGI 2022 §3.1-5.2" },
+    { group:"Support",  name:"Medication room",              net_sf:80,  count:1,  fgi:"FGI 2022 §3.1-5.4" },
+    { group:"Support",  name:"Equipment / supply storage",   net_sf:120, count:2,  fgi:"FGI 2022 §3.1-5.6" },
+    { group:"Support",  name:"Staff lounge / lockers",       net_sf:150, count:1,  fgi:"Recommended" },
+    { group:"Patient",  name:"Waiting room (seats)",         net_sf:18,  count:40, fgi:"18 SF/seat guideline" },
+    { group:"Patient",  name:"Reception / check-in",         net_sf:140, count:1,  fgi:"Recommended" },
+    { group:"Patient",  name:"Patient toilet room",          net_sf:60,  count:4,  fgi:"FGI 2022 §3.1-8.1" },
+    { group:"Patient",  name:"Family consultation room",     net_sf:120, count:1,  fgi:"Recommended — Neuro Onc" },
+  ],
+  "Cardiovascular": [
+    { group:"Clinical", name:"Exam / consult room",          net_sf:120, count:14, fgi:"FGI 2022 §3.1-3.2.1" },
+    { group:"Clinical", name:"Cardiac procedure room",       net_sf:400, count:2,  fgi:"FGI 2022 §3.7-4.1" },
+    { group:"Clinical", name:"Stress test room",             net_sf:250, count:2,  fgi:"FGI 2022 §3.1-3.5" },
+    { group:"Clinical", name:"Echo / imaging room",          net_sf:220, count:3,  fgi:"FGI 2022 §3.1-3.5" },
+    { group:"Clinical", name:"Nurse station / team station", net_sf:120, count:2,  fgi:"FGI 2022 §3.1-7.2" },
+    { group:"Clinical", name:"Provider offices",             net_sf:120, count:6,  fgi:"FGI 2022 §3.1-7.3" },
+    { group:"Support",  name:"Clean utility room",           net_sf:100, count:2,  fgi:"FGI 2022 §3.1-5.1" },
+    { group:"Support",  name:"Soiled utility / holding",     net_sf:80,  count:2,  fgi:"FGI 2022 §3.1-5.2" },
+    { group:"Support",  name:"Equipment storage",            net_sf:150, count:2,  fgi:"FGI 2022 §3.1-5.6" },
+    { group:"Patient",  name:"Waiting room (seats)",         net_sf:18,  count:50, fgi:"18 SF/seat guideline" },
+    { group:"Patient",  name:"Reception / check-in",         net_sf:160, count:1,  fgi:"Recommended" },
+    { group:"Patient",  name:"Patient toilet room",          net_sf:60,  count:4,  fgi:"FGI 2022 §3.1-8.1" },
+  ],
+  "Orthopedics": [
+    { group:"Clinical", name:"Exam / consult room",          net_sf:130, count:10, fgi:"FGI 2022 §3.1-3.2.1" },
+    { group:"Clinical", name:"Cast / procedure room",        net_sf:200, count:2,  fgi:"FGI 2022 §3.1-3.4" },
+    { group:"Clinical", name:"X-ray room",                   net_sf:250, count:2,  fgi:"FGI 2022 §3.7-3.2" },
+    { group:"Clinical", name:"Nurse station",                net_sf:120, count:1,  fgi:"FGI 2022 §3.1-7.2" },
+    { group:"Clinical", name:"Provider offices",             net_sf:120, count:4,  fgi:"FGI 2022 §3.1-7.3" },
+    { group:"Support",  name:"Clean utility room",           net_sf:100, count:1,  fgi:"FGI 2022 §3.1-5.1" },
+    { group:"Support",  name:"Soiled utility",               net_sf:80,  count:1,  fgi:"FGI 2022 §3.1-5.2" },
+    { group:"Support",  name:"Equipment / implant storage",  net_sf:180, count:2,  fgi:"FGI 2022 §3.1-5.6" },
+    { group:"Patient",  name:"Waiting room (seats)",         net_sf:18,  count:35, fgi:"18 SF/seat guideline" },
+    { group:"Patient",  name:"Reception / check-in",         net_sf:140, count:1,  fgi:"Recommended" },
+    { group:"Patient",  name:"Patient toilet room",          net_sf:60,  count:3,  fgi:"FGI 2022 §3.1-8.1" },
+  ],
+  "Behavioral Health": [
+    { group:"Clinical", name:"Individual therapy room",      net_sf:120, count:8,  fgi:"FGI 2022 §3.9-3.2" },
+    { group:"Clinical", name:"Group therapy room",           net_sf:400, count:2,  fgi:"FGI 2022 §3.9-3.3" },
+    { group:"Clinical", name:"Psychiatric eval room",        net_sf:140, count:2,  fgi:"FGI 2022 §3.9-3.1" },
+    { group:"Clinical", name:"Nurse station",                net_sf:120, count:1,  fgi:"FGI 2022 §3.1-7.2" },
+    { group:"Clinical", name:"Provider offices",             net_sf:120, count:4,  fgi:"FGI 2022 §3.1-7.3" },
+    { group:"Support",  name:"Medication room",              net_sf:80,  count:1,  fgi:"FGI 2022 §3.1-5.4" },
+    { group:"Support",  name:"Storage",                      net_sf:100, count:1,  fgi:"FGI 2022 §3.1-5.6" },
+    { group:"Patient",  name:"Waiting room (seats)",         net_sf:18,  count:24, fgi:"18 SF/seat guideline" },
+    { group:"Patient",  name:"Reception / check-in",         net_sf:120, count:1,  fgi:"Recommended" },
+    { group:"Patient",  name:"Patient toilet room",          net_sf:60,  count:2,  fgi:"FGI 2022 §3.1-8.1" },
+  ],
+  "Women's Health": [
+    { group:"Clinical", name:"Exam / OB room",               net_sf:130, count:10, fgi:"FGI 2022 §3.1-3.2.1" },
+    { group:"Clinical", name:"Ultrasound room",              net_sf:180, count:3,  fgi:"FGI 2022 §3.7-3.2" },
+    { group:"Clinical", name:"Procedure / colposcopy room",  net_sf:200, count:1,  fgi:"FGI 2022 §3.1-3.4" },
+    { group:"Clinical", name:"Nurse station",                net_sf:120, count:2,  fgi:"FGI 2022 §3.1-7.2" },
+    { group:"Clinical", name:"Provider offices",             net_sf:120, count:4,  fgi:"FGI 2022 §3.1-7.3" },
+    { group:"Support",  name:"Clean utility room",           net_sf:100, count:1,  fgi:"FGI 2022 §3.1-5.1" },
+    { group:"Support",  name:"Soiled utility",               net_sf:80,  count:1,  fgi:"FGI 2022 §3.1-5.2" },
+    { group:"Support",  name:"Specimen / lab handoff",       net_sf:60,  count:1,  fgi:"Recommended" },
+    { group:"Patient",  name:"Waiting room (seats)",         net_sf:18,  count:30, fgi:"18 SF/seat guideline" },
+    { group:"Patient",  name:"Reception / check-in",         net_sf:140, count:1,  fgi:"Recommended" },
+    { group:"Patient",  name:"Patient toilet / changing",    net_sf:70,  count:3,  fgi:"FGI 2022 §3.1-8.1" },
+  ],
+  "Custom": [
+    { group:"Clinical", name:"Exam / consult room",          net_sf:120, count:10, fgi:"FGI 2022 §3.1-3.2.1" },
+    { group:"Clinical", name:"Procedure room",               net_sf:180, count:1,  fgi:"FGI 2022 §3.1-3.4" },
+    { group:"Clinical", name:"Nurse station",                net_sf:120, count:1,  fgi:"FGI 2022 §3.1-7.2" },
+    { group:"Support",  name:"Clean utility room",           net_sf:100, count:1,  fgi:"FGI 2022 §3.1-5.1" },
+    { group:"Support",  name:"Soiled utility",               net_sf:80,  count:1,  fgi:"FGI 2022 §3.1-5.2" },
+    { group:"Support",  name:"Storage",                      net_sf:120, count:1,  fgi:"FGI 2022 §3.1-5.6" },
+    { group:"Patient",  name:"Waiting room (seats)",         net_sf:18,  count:20, fgi:"18 SF/seat guideline" },
+    { group:"Patient",  name:"Reception / check-in",         net_sf:120, count:1,  fgi:"Recommended" },
+    { group:"Patient",  name:"Patient toilet room",          net_sf:60,  count:2,  fgi:"FGI 2022 §3.1-8.1" },
+  ]
+};
+
+const FINANCIAL_DEFAULTS = {
+  "Neurological Oncology":{ base_rev:5.2, reno_ir:2.4, new_ir:4.8, rev_gr:5.5, reno_opex:3.2, new_opex:2.6, sq_opex:3.8, comply:.35, defer:20, wacc:6.5, horizon:10, ramp:3 },
+  "Cardiovascular":        { base_rev:9.4, reno_ir:3.8, new_ir:7.2, rev_gr:4.5, reno_opex:4.8, new_opex:3.9, sq_opex:5.2, comply:.45, defer:20, wacc:6.5, horizon:10, ramp:2 },
+  "Orthopedics":           { base_rev:7.8, reno_ir:2.1, new_ir:4.4, rev_gr:3.8, reno_opex:3.6, new_opex:2.9, sq_opex:4.0, comply:.25, defer:20, wacc:6.5, horizon:10, ramp:2 },
+  "Behavioral Health":     { base_rev:3.1, reno_ir:1.2, new_ir:2.4, rev_gr:6.5, reno_opex:2.4, new_opex:2.0, sq_opex:2.8, comply:.20, defer:20, wacc:6.5, horizon:10, ramp:4 },
+  "Women's Health":        { base_rev:4.6, reno_ir:1.8, new_ir:3.5, rev_gr:4.0, reno_opex:3.0, new_opex:2.4, sq_opex:3.3, comply:.22, defer:20, wacc:6.5, horizon:10, ramp:2 },
+  "Custom":                { base_rev:5.0, reno_ir:2.0, new_ir:4.0, rev_gr:4.0, reno_opex:3.0, new_opex:2.5, sq_opex:3.5, comply:.30, defer:20, wacc:6.5, horizon:10, ramp:3 },
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let serviceLines = [{ name:"Neurological Oncology", preset:"Neurological Oncology", rooms: deepCopy(ROOM_DEFS["Neurological Oncology"]) }];
+let activeIdx = 0;
+let pendingPreset = null;
+let currentView = 'space';
+
+function deepCopy(o){ return JSON.parse(JSON.stringify(o)); }
+const $= id => document.getElementById(id);
+const fmtM=(v,d=1)=>Math.abs(v)<.005?'—':v>=0?`$${Math.abs(v).toFixed(d)}M`:`($${Math.abs(v).toFixed(d)}M)`;
+const fmtPct=v=>isFinite(v)?`${(v*100).toFixed(1)}%`:'N/A';
+const fmtYr=v=>isFinite(v)&&v>0&&v<100?`${v.toFixed(1)} yrs`:'N/A';
+const fmtSF=v=>v.toLocaleString()+' SF';
+const fmtDollar=v=>'$'+Math.round(v).toLocaleString();
+
+// ─── SLIDER HELPER ───────────────────────────────────────────────────────────
+function slide(el, valId, fmt){
+  const pct=((el.value-el.min)/(el.max-el.min))*100;
+  el.style.setProperty('--pct',pct+'%');
+  $(valId).textContent=fmt(el.value);
+  calc();
+}
+function initSliders(){
+  document.querySelectorAll('input[type=range]').forEach(el=>{
+    const pct=((el.value-el.min)/(el.max-el.min))*100;
+    el.style.setProperty('--pct',pct+'%');
+  });
+}
+
+// ─── SPACE PROGRAM ───────────────────────────────────────────────────────────
+function renderSpaceTable(){
+  const rooms = serviceLines[activeIdx].rooms;
+  let html='', lastGroup='';
+  rooms.forEach((r,i)=>{
+    if(r.group!==lastGroup){
+      html+=`<tr class="sp-group"><td colspan="5">${r.group}</td></tr>`;
+      lastGroup=r.group;
+    }
+    const nasf=r.net_sf*r.count;
+    html+=`<tr>
+      <td>${r.name}</td>
+      <td><input type="number" min="0" max="999" value="${r.count}" data-idx="${i}" onchange="updateCount(this)"></td>
+      <td>${r.net_sf.toLocaleString()} SF</td>
+      <td>${nasf.toLocaleString()} SF</td>
+      <td style="font-size:10px;color:var(--gray-400);">${r.fgi}</td>
+    </tr>`;
+  });
+  // Subtotals by group
+  const groups=['Clinical','Support','Patient'];
+  groups.forEach(g=>{
+    const tot=rooms.filter(r=>r.group===g).reduce((s,r)=>s+r.net_sf*r.count,0);
+    html+=`<tr class="sp-subtotal"><td colspan="3">${g} subtotal</td><td>${tot.toLocaleString()} SF</td><td></td></tr>`;
+  });
+  const totalNASF=rooms.reduce((s,r)=>s+r.net_sf*r.count,0);
+  const gf=parseFloat($('gross_factor').value);
+  const grossSF=Math.round(totalNASF*gf);
+  html+=`<tr class="sp-total"><td colspan="3">Total Net Assignable SF (NASF)</td><td>${totalNASF.toLocaleString()} SF</td><td></td></tr>`;
+  html+=`<tr class="sp-total"><td colspan="3">Gross SF (NASF × ${gf.toFixed(2)}x grossing factor)</td><td>${grossSF.toLocaleString()} SF</td><td></td></tr>`;
+  $('sp-tbody').innerHTML=html;
+}
+
+function updateCount(el){
+  const idx=parseInt(el.dataset.idx);
+  serviceLines[activeIdx].rooms[idx].count=parseInt(el.value)||0;
+  calc();
+}
+
+function getSpaceCalc(){
+  const rooms=serviceLines[activeIdx].rooms;
+  const nasf=rooms.reduce((s,r)=>s+r.net_sf*r.count,0);
+  const gf=parseFloat($('gross_factor').value);
+  const grossSF=nasf*gf;
+  const renoSF=parseFloat($('reno_sf').value);
+  const newSF=parseFloat($('new_sf').value);
+  const ae=parseFloat($('sc_ae').value)/100;
+  const pm=parseFloat($('sc_pm').value)/100;
+  const perm=parseFloat($('sc_perm').value)/100;
+  const ffe=parseFloat($('sc_ffe').value)/100;
+  const it=parseFloat($('sc_it').value)/100;
+  const oc=parseFloat($('sc_oc').value)/100;
+  const softTotal=ae+pm+perm+ffe+it+oc;
+  const renoCont=parseFloat($('reno_cont').value)/100;
+  const newCont=parseFloat($('new_cont').value)/100;
+
+  const buildHardReno=grossSF*renoSF;
+  const buildHardNew=grossSF*newSF;
+  const softReno=buildHardReno*softTotal;
+  const softNew=buildHardNew*softTotal;
+  const contReno=(buildHardReno+softReno)*renoCont;
+  const contNew=(buildHardNew+softNew)*newCont;
+  const totalReno=buildHardReno+softReno+contReno;
+  const totalNew=buildHardNew+softNew+contNew;
+
+  return { nasf, grossSF, renoSF, newSF, ae, pm, perm, ffe, it, oc, softTotal,
+           renoCont, newCont, buildHardReno, buildHardNew, softReno, softNew,
+           contReno, contNew, totalReno, totalNew };
+}
+
+function renderBuildup(sp){
+  function buildCol(hard, soft_ae, soft_pm, soft_perm, soft_ffe, soft_it, soft_oc, softTot, cont, total, scenario){
+    const rows=[
+      { lbl:'Gross SF', formula:`${sp.grossSF.toLocaleString()} SF`, val:null, isFormula:true },
+      { lbl:`× $/SF (${scenario})`, formula:`${sp.grossSF.toLocaleString()} SF × $${scenario==='reno'?sp.renoSF:sp.newSF}/SF`, val:fmtDollar(hard), isHard:true },
+      { lbl:'= Hard cost', val:fmtDollar(hard), isSubtotal:true },
+      { lbl:'', isGap:true },
+      { lbl:'+ A&E fees', formula:`${(sp.ae*100).toFixed(1)}% × hard cost`, val:fmtDollar(soft_ae) },
+      { lbl:'+ Owner PM', formula:`${(sp.pm*100).toFixed(1)}%`, val:fmtDollar(soft_pm) },
+      { lbl:'+ Permits & testing', formula:`${(sp.perm*100).toFixed(1)}%`, val:fmtDollar(soft_perm) },
+      { lbl:'+ FF&E', formula:`${(sp.ffe*100).toFixed(1)}%`, val:fmtDollar(soft_ffe) },
+      { lbl:'+ IT / AV / infra', formula:`${(sp.it*100).toFixed(1)}%`, val:fmtDollar(soft_it) },
+      { lbl:"+ Owner's contingency", formula:`${(sp.oc*100).toFixed(1)}%`, val:fmtDollar(soft_oc) },
+      { lbl:`= Total soft costs`, formula:`${(sp.softTotal*100).toFixed(1)}% of hard cost`, val:fmtDollar(softTot), isSubtotal:true },
+      { lbl:'', isGap:true },
+      { lbl:'Hard + soft cost', val:fmtDollar(hard+softTot), isSubtotal:true },
+      { lbl:`+ Construction contingency`, formula:`${scenario==='reno'?(sp.renoCont*100).toFixed(1):(sp.newCont*100).toFixed(1)}% of hard+soft`, val:fmtDollar(cont) },
+      { lbl:'', isGap:true },
+    ];
+
+    let html=rows.map(r=>{
+      if(r.isGap) return `<div style="height:4px;background:var(--gray-100);"></div>`;
+      if(r.isSubtotal) return `<div class="buildup-row subtotal"><span class="bl">${r.lbl}${r.formula?`<div class="buildup-formula">${r.formula}</div>`:''}</span><span class="bv">${r.val}</span></div>`;
+      if(r.isFormula) return `<div class="buildup-row"><span class="bl">${r.lbl}<div class="buildup-formula">${r.formula}</div></span><span class="bv" style="color:var(--gray-400)">↓</span></div>`;
+      return `<div class="buildup-row"><span class="bl">${r.lbl}${r.formula?`<div class="buildup-formula">${r.formula}</div>`:''}</span><span class="bv">${r.val||''}</span></div>`;
+    }).join('');
+
+    html+=`<div class="buildup-row total"><span class="bl" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.06em;text-transform:uppercase;">ALL-IN CAPEX</span><span class="bv" style="font-size:16px;">${fmtDollar(total)}</span></div>`;
+    html+=`<div class="buildup-row note-row"><span class="bl-note">= $${Math.round(total/sp.grossSF)}/gross SF all-in · ${sp.grossSF.toLocaleString()} gross SF · ${sp.nasf.toLocaleString()} NASF</span></div>`;
+    return html;
+  }
+
+  $('buildup-reno').innerHTML = buildCol(
+    sp.buildHardReno, sp.buildHardReno*sp.ae, sp.buildHardReno*sp.pm,
+    sp.buildHardReno*sp.perm, sp.buildHardReno*sp.ffe, sp.buildHardReno*sp.it,
+    sp.buildHardReno*sp.oc, sp.softReno, sp.contReno, sp.totalReno, 'reno'
+  );
+  $('buildup-new').innerHTML = buildCol(
+    sp.buildHardNew, sp.buildHardNew*sp.ae, sp.buildHardNew*sp.pm,
+    sp.buildHardNew*sp.perm, sp.buildHardNew*sp.ffe, sp.buildHardNew*sp.it,
+    sp.buildHardNew*sp.oc, sp.softNew, sp.contNew, sp.totalNew, 'new'
+  );
+}
+
+// ─── FINANCIAL MODEL ─────────────────────────────────────────────────────────
+function calcIRR(cfs,guess=0.1){
+  let r=guess;
+  for(let i=0;i<300;i++){
+    let npv=0,d=0;
+    cfs.forEach((cf,t)=>{const disc=Math.pow(1+r,t);npv+=cf/disc;d-=t*cf/(disc*(1+r));});
+    if(Math.abs(d)<1e-12)break;
+    const nr=r-npv/d;
+    if(Math.abs(nr-r)<1e-9)return nr;
+    r=isFinite(nr)?nr:guess;
+  }
+  return NaN;
+}
+function calcNPV(rate,cfs){return cfs.reduce((s,cf,t)=>s+cf/Math.pow(1+rate,t),0);}
+function payback(cum){for(let i=1;i<cum.length;i++)if(cum[i]>=0)return i-cum[i-1]/(cum[i]-cum[i-1]);return NaN;}
+function rampF(yr,r){if(yr<=0)return 0;if(yr>=r)return 1;return yr/r;}
+function cumSum(arr){return arr.reduce((a,v,i)=>[...a,(a[i-1]||0)+v],[]);}
+
+// ─── MAIN CALC ────────────────────────────────────────────────────────────────
+function calc(){
+  const sp=getSpaceCalc();
+  renderSpaceTable();
+  renderBuildup(sp);
+
+  // Capex from space program (in $M)
+  const renoCap=sp.totalReno/1e6;
+  const newCap=sp.totalNew/1e6;
+
+  $('capex-notice').textContent=`Reno $${renoCap.toFixed(1)}M · New $${newCap.toFixed(1)}M`;
+
+  // Financial inputs
+  const baseRev=parseFloat($('base_rev').value);
+  const renoIR=parseFloat($('reno_ir').value);
+  const newIR=parseFloat($('new_ir').value);
+  const revGr=parseFloat($('rev_gr').value)/100;
+  const renoOpex=parseFloat($('reno_opex').value);
+  const newOpex=parseFloat($('new_opex').value);
+  const sqOpex=parseFloat($('sq_opex').value);
+  const comply=parseFloat($('comply').value);
+  const deferM=parseFloat($('defer').value);
+  const wacc=parseFloat($('wacc').value)/100;
+  const horizon=parseInt($('horizon').value);
+  const ramp=parseInt($('ramp').value);
+  const annDefer=deferM*0.11;
+
+  const years=Array.from({length:horizon+1},(_,i)=>i);
+
+  const renoCF=years.map(t=>{
+    if(t===0)return -renoCap;
+    const rf=rampF(t,ramp);
+    return(baseRev+renoIR*rf)*Math.pow(1+revGr,t)-renoOpex*Math.pow(1.025,t)+annDefer;
+  });
+  const newCF=years.map(t=>{
+    if(t===0)return -newCap;
+    const rf=rampF(t,ramp);
+    return(baseRev+newIR*rf)*Math.pow(1+revGr,t)-newOpex*Math.pow(1.022,t)+annDefer;
+  });
+  const sqCF=years.map(t=>{
+    if(t===0)return 0;
+    return baseRev*Math.pow(1+revGr*.5,t)-sqOpex*Math.pow(1.03,t)-annDefer*Math.pow(1.05,t)-comply*Math.pow(1.03,t)-.42;
+  });
+
+  const cumReno=cumSum(renoCF), cumNew=cumSum(newCF), cumSQ=cumSum(sqCF);
+  const renoNPV=calcNPV(wacc,renoCF), newNPV=calcNPV(wacc,newCF), sqNPV=calcNPV(wacc,sqCF);
+  const renoIRR=calcIRR(renoCF), newIRR=calcIRR(newCF);
+  const pbReno=payback(cumReno), pbNew=payback(cumNew);
+  const renoROI=(cumReno[horizon]+renoCap)/renoCap;
+  const newROI=(cumNew[horizon]+newCap)/newCap;
+  const annBurden=sqOpex+annDefer+comply+.42;
+
+  // KPIs
+  const setN=(id,v,pos)=>{const el=$(id);el.textContent=fmtM(v);el.className='kpi-npv '+(pos?'pos':'neg');};
+  setN('kpi-reno-npv',renoNPV,renoNPV>=0);
+  $('kpi-reno-irr').textContent=fmtPct(renoIRR);
+  $('kpi-reno-pb').textContent=fmtYr(pbReno);
+  $('kpi-reno-roi').textContent=fmtPct(renoROI);
+  setN('kpi-new-npv',newNPV,newNPV>=0);
+  $('kpi-new-irr').textContent=fmtPct(newIRR);
+  $('kpi-new-pb').textContent=fmtYr(pbNew);
+  $('kpi-new-roi').textContent=fmtPct(newROI);
+  $('kpi-sq-npv').textContent=fmtM(sqNPV);
+  $('kpi-sq-ann').textContent=fmtM(annBurden);
+  $('kpi-sq-dr').textContent=fmtM(renoNPV-sqNPV);
+  $('kpi-sq-dn').textContent=fmtM(newNPV-sqNPV);
+
+  // Chart
+  const labels=years.map(t=>t===0?'Today':'Yr '+t);
+  chart.data.labels=labels;
+  chart.data.datasets[0].data=cumReno;
+  chart.data.datasets[1].data=cumNew;
+  chart.data.datasets[2].data=cumSQ;
+  chart.update('none');
+
+  // CF table
+  $('cf-head').innerHTML='<th>Metric</th>'+years.map(t=>`<th>${t===0?'Y0':'Y'+t}</th>`).join('');
+  const trow=(lbl,vals,cls)=>`<tr><td>${lbl}</td>${vals.map(v=>`<td class="${cls}${v<0?' neg':''}">${fmtM(v)}</td>`).join('')}</tr>`;
+  const div=(lbl)=>`<tr class="sp-group"><td colspan="${horizon+2}">${lbl}</td></tr>`;
+  $('cf-body').innerHTML=[
+    div('Renovation'),trow('Annual CF',renoCF,''),trow('Cumulative CF',cumReno,''),
+    div('New Build'),trow('Annual CF',newCF,''),trow('Cumulative CF',cumNew,''),
+    div('Status Quo'),trow('Annual net',sqCF,''),trow('Cumulative',cumSQ,''),
+    `<tr class="sp-total"><td>NPV</td><td colspan="${horizon+1}" style="text-align:left;padding-left:12px;">Reno: ${fmtM(renoNPV)} · New: ${fmtM(newNPV)} · Status Quo: ${fmtM(sqNPV)}</td></tr>`
+  ].join('');
+}
+
+// ─── CHART ────────────────────────────────────────────────────────────────────
+const chart=new Chart($('cfChart').getContext('2d'),{
+  type:'line',
+  data:{labels:[],datasets:[
+    {label:'Renovation',data:[],borderColor:'#444',backgroundColor:'rgba(68,68,68,.07)',tension:.35,pointRadius:3,borderWidth:2.5,fill:false},
+    {label:'New Build', data:[],borderColor:'#BB0000',backgroundColor:'rgba(187,0,0,.07)',tension:.35,pointRadius:3,borderWidth:2.5,fill:false},
+    {label:'Status Quo',data:[],borderColor:'#bbb',backgroundColor:'rgba(153,153,153,.05)',tension:.35,pointRadius:2,borderWidth:1.5,borderDash:[5,4],fill:false},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmtM(c.parsed.y)}`}}},
+    scales:{
+      x:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Barlow Condensed',size:11},color:'#666'}},
+      y:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Barlow Condensed',size:11},color:'#666',callback:v=>`$${v.toFixed(0)}M`}}
+    }
+  }
+});
+
+// ─── VIEW SWITCHING ───────────────────────────────────────────────────────────
+function switchView(v, btn){
+  currentView=v;
+  document.querySelectorAll('.tool-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  $('view-space').classList.toggle('active',v==='space');
+  $('view-finance').classList.toggle('active',v==='finance');
+  $('left-space').style.display=v==='space'?'':'none';
+  $('left-finance').style.display=v==='finance'?'':'none';
+}
+
+// ─── SERVICE LINE TABS ────────────────────────────────────────────────────────
+function renderTabs(){
+  const container=$('sl-tabs');
+  const addBtn=container.querySelector('.add-sl');
+  container.querySelectorAll('.sl-tab').forEach(t=>t.remove());
+  serviceLines.forEach((sl,i)=>{
+    const btn=document.createElement('button');
+    btn.className='sl-tab'+(i===activeIdx?' active':'');
+    btn.innerHTML=`<span class="dot"></span>${sl.name}`;
+    btn.onclick=()=>switchSL(i);
+    container.insertBefore(btn,addBtn);
+  });
+}
+
+function switchSL(idx){
+  activeIdx=idx;
+  const sl=serviceLines[idx];
+  $('sl-name').textContent=sl.name;
+
+  // Load financial defaults for this preset
+  const fd=FINANCIAL_DEFAULTS[sl.preset]||FINANCIAL_DEFAULTS['Custom'];
+  const finMap=[
+    ['base_rev','v_base_rev',v=>'$'+parseFloat(v).toFixed(1)+'M'],
+    ['reno_ir','v_reno_ir',v=>'$'+parseFloat(v).toFixed(1)+'M'],
+    ['new_ir','v_new_ir',v=>'$'+parseFloat(v).toFixed(1)+'M'],
+    ['rev_gr','v_rev_gr',v=>parseFloat(v).toFixed(1)+'%'],
+    ['reno_opex','v_reno_opex',v=>'$'+parseFloat(v).toFixed(1)+'M'],
+    ['new_opex','v_new_opex',v=>'$'+parseFloat(v).toFixed(1)+'M'],
+    ['sq_opex','v_sq_opex',v=>'$'+parseFloat(v).toFixed(1)+'M'],
+    ['comply','v_comply',v=>'$'+parseFloat(v).toFixed(2)+'M'],
+    ['defer','v_defer',v=>'$'+parseFloat(v).toFixed(1)+'M'],
+    ['wacc','v_wacc',v=>parseFloat(v).toFixed(2)+'%'],
+    ['horizon','v_horizon',v=>v+' yrs'],
+    ['ramp','v_ramp',v=>v+' yrs'],
+  ];
+  const fdKeyMap={base_rev:'base_rev',reno_ir:'reno_ir',new_ir:'new_ir',rev_gr:'rev_gr',reno_opex:'reno_opex',new_opex:'new_opex',sq_opex:'sq_opex',comply:'comply',defer:'defer',wacc:'wacc',horizon:'horizon',ramp:'ramp'};
+  finMap.forEach(([id,valId,fmt])=>{
+    const el=$(id); if(!el)return;
+    const v=fd[fdKeyMap[id]];
+    if(v!==undefined){el.value=v;const pct=((el.value-el.min)/(el.max-el.min))*100;el.style.setProperty('--pct',pct+'%');$(valId).textContent=fmt(el.value);}
+  });
+
+  renderTabs();
+  calc();
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+const PRESET_DESC={
+  "Neurological Oncology":"Infusion-heavy, high downstream",
+  "Cardiovascular":"High volume, procedural revenue",
+  "Orthopedics":"Surgical volume, payer-mix sensitive",
+  "Behavioral Health":"Lower margin, high growth",
+  "Women's Health":"Volume + downstream maternity",
+  "Custom":"Enter your own room counts"
+};
+
+function openModal(){
+  pendingPreset=null;
+  $('new-sl-name').value='';
+  $('preset-grid').innerHTML=Object.keys(ROOM_DEFS).map(name=>
+    `<button class="preset-btn" onclick="selectPreset('${name.replace(/'/g,"\\'")}',this)">
+      <strong>${name}</strong><span>${PRESET_DESC[name]||''}</span>
+    </button>`
+  ).join('');
+  $('modal').classList.add('open');
+}
+function closeModal(){$('modal').classList.remove('open');}
+function selectPreset(name,btn){
+  pendingPreset=name;
+  $('new-sl-name').value=name!=='Custom'?name:'';
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function addSL(){
+  const name=$('new-sl-name').value.trim()||pendingPreset||'New Service Line';
+  const preset=pendingPreset||'Custom';
+  serviceLines.push({name,preset,rooms:deepCopy(ROOM_DEFS[preset]||ROOM_DEFS['Custom'])});
+  activeIdx=serviceLines.length-1;
+  closeModal();
+  renderTabs();
+  switchSL(activeIdx);
+}
+$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal();});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderTabs();
+initSliders();
+calc();
+</script>
+</body>
+</html>
