@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tumbleweed — Healthcare Capital Decision Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --scarlet:#BB0000;--scarlet-dk:#8B0000;--scarlet-lt:#d63030;--scarlet-pale:#fdf0f0;
+  --gray-900:#1a1a1a;--gray-800:#2d2d2d;--gray-700:#444;--gray-600:#666;
+  --gray-500:#777;--gray-400:#999;--gray-300:#bbb;--gray-200:#e0e0e0;
+  --gray-100:#f2f2f2;--gray-50:#f8f8f8;--white:#fff;--border:#ddd;
+  --confirmed:#1a6b3c;--confirmed-lt:#e8f5ee;--confirmed-bd:#a3d9b8;
+  --estimated:#7a4f00;--estimated-lt:#fff8e6;--estimated-bd:#f0c060;
+  --needed:#8B0000;--needed-lt:#fdf0f0;--needed-bd:#f5b8b8;
+  --growth:#185FA5;--growth-lt:#e6f1fb;--growth-bd:#85b7eb;
+  --shadow-sm:0 1px 4px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.12);--r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--gray-100);color:var(--gray-900);min-height:100vh;font-size:14px;}
+
+.header{background:var(--gray-900);padding:0 32px;border-bottom:4px solid var(--scarlet);position:sticky;top:0;z-index:100;}
+.header-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px;gap:12px;}
+.wordmark{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;letter-spacing:.06em;color:var(--white);text-transform:uppercase;flex-shrink:0;}
+.wordmark span{color:var(--scarlet-lt);}
+.dept-tabs{display:flex;align-items:center;gap:2px;height:100%;overflow-x:auto;flex:1;}
+.dept-tab{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-400);background:none;border:none;cursor:pointer;padding:0 14px;height:100%;border-bottom:4px solid transparent;margin-bottom:-4px;transition:color .15s,border-color .15s;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;}
+.dept-tab:hover{color:var(--gray-200);}
+.dept-tab.active{color:var(--white);border-bottom-color:var(--scarlet-lt);}
+.dept-tab .dot{width:6px;height:6px;border-radius:50%;background:var(--gray-600);flex-shrink:0;}
+.dept-tab.active .dot{background:var(--scarlet-lt);}
+.dept-tab.portfolio-tab.active{border-bottom-color:#378ADD;}
+.hdr-actions{display:flex;gap:8px;flex-shrink:0;}
+.btn-hdr{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:4px;border:none;cursor:pointer;transition:background .15s;}
+.btn-add-dept{background:var(--scarlet);color:white;}
+.btn-add-dept:hover{background:var(--scarlet-dk);}
+.btn-tracker{background:var(--growth);color:white;border:1px solid #0C447C;}
+.btn-tracker:hover{background:#0C447C;}
+.btn-portfolio{background:var(--gray-700);color:var(--gray-300);border:1px solid var(--gray-600);}
+.btn-portfolio:hover{background:var(--gray-600);color:white;}
+
+.tool-nav-wrap{background:var(--gray-800);border-bottom:1px solid var(--gray-700);}
+.tool-nav{max-width:1600px;margin:0 auto;display:flex;}
+.tool-tab{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-400);background:none;border:none;cursor:pointer;padding:9px 16px;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;}
+.tool-tab:hover{color:var(--gray-200);}
+.tool-tab.active{color:var(--white);border-bottom-color:var(--scarlet);}
+
+.readiness-bar{background:var(--gray-800);padding:6px 32px;border-bottom:1px solid var(--gray-700);}
+.readiness-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.r-badge{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;}
+.r-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.r-confirmed .r-dot{background:var(--confirmed);} .r-confirmed{color:var(--confirmed);}
+.r-estimated .r-dot{background:var(--estimated);} .r-estimated{color:var(--estimated);}
+.r-needed .r-dot{background:var(--needed);} .r-needed{color:var(--needed);}
+.r-growth .r-dot{background:var(--growth);} .r-growth{color:var(--growth);}
+.conf-score{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--gray-300);}
+.conf-score span{color:var(--white);}
+
+.main{max-width:1600px;margin:0 auto;padding:18px 32px;display:grid;grid-template-columns:290px 1fr;gap:18px;align-items:start;}
+
+/* PANEL */
+.panel{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-sm);}
+.panel-banner{padding:9px 14px;border-radius:var(--r) var(--r) 0 0;}
+.panel-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:white;}
+.panel-sub{font-size:9px;opacity:.75;margin-top:1px;color:white;}
+.panel-scroll{overflow-y:auto;max-height:calc(100vh - 178px);}
+.panel-scroll::-webkit-scrollbar{width:3px;}
+.panel-scroll::-webkit-scrollbar-thumb{background:var(--gray-200);}
+
+.sec-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--white);padding:5px 12px;display:flex;justify-content:space-between;align-items:center;}
+.ig{padding:5px 12px 3px;border-bottom:1px solid var(--gray-100);}
+.ig-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px;gap:4px;}
+.ig-lbl{font-size:11px;color:var(--gray-700);font-weight:500;line-height:1.3;flex:1;}
+.ig-right{display:flex;align-items:center;gap:3px;flex-shrink:0;}
+.tag{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:1px 5px;border-radius:3px;white-space:nowrap;}
+.tag-c{background:var(--confirmed-lt);color:var(--confirmed);border:1px solid var(--confirmed-bd);}
+.tag-e{background:var(--estimated-lt);color:var(--estimated);border:1px solid var(--estimated-bd);}
+.tag-n{background:var(--needed-lt);color:var(--needed);border:1px solid var(--needed-bd);}
+.tag-g{background:var(--growth-lt);color:var(--growth);border:1px solid var(--growth-bd);}
+.vb{font-family:'Barlow Condensed',monospace;font-size:11px;font-weight:600;background:var(--gray-100);border:1px solid var(--border);padding:1px 5px;border-radius:3px;min-width:58px;text-align:right;white-space:nowrap;}
+.vb.c{background:var(--confirmed-lt);border-color:var(--confirmed-bd);color:var(--confirmed);}
+.vb.n{background:var(--needed-lt);border-color:var(--needed-bd);color:var(--needed);}
+.vb.g{background:var(--growth-lt);border-color:var(--growth-bd);color:var(--growth);}
+.sr{display:flex;align-items:center;gap:5px;margin-top:1px;}
+.sr input[type=range]{flex:1;height:3px;-webkit-appearance:none;appearance:none;border-radius:2px;outline:none;background:linear-gradient(to right,var(--scarlet) 0%,var(--scarlet) var(--pct,50%),var(--gray-200) var(--pct,50%));}
+.sr input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--scarlet);border:2px solid white;cursor:pointer;}
+.sr input[type=range].co{background:linear-gradient(to right,var(--confirmed) 0%,var(--confirmed) var(--pct,50%),var(--gray-200) var(--pct,50%));}
+.sr input[type=range].co::-webkit-slider-thumb{background:var(--confirmed);}
+.sr input[type=range].gr{background:linear-gradient(to right,var(--growth) 0%,var(--growth) var(--pct,50%),var(--gray-200) var(--pct,50%));}
+.sr input[type=range].gr::-webkit-slider-thumb{background:var(--growth);}
+.note{font-size:9px;color:var(--gray-400);margin-top:1px;font-style:italic;line-height:1.3;}
+.note.src{color:var(--confirmed);font-style:normal;font-weight:500;}
+.note.flg{color:var(--needed);font-style:normal;font-weight:500;}
+.note.grw{color:var(--growth);font-style:normal;font-weight:500;}
+
+/* RESULTS */
+.results{display:flex;flex-direction:column;gap:14px;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden;}
+.card-hdr{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.card-sub{font-size:10px;color:var(--gray-400);}
+
+/* KPIs */
+.kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi-reno::after{background:var(--gray-700);}
+.kpi-new::after{background:var(--scarlet);}
+.kpi-sq::after{background:var(--gray-400);}
+.kpi-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;}
+.kpi-reno .kpi-lbl{color:var(--gray-700);}
+.kpi-new .kpi-lbl{color:var(--scarlet);}
+.kpi-sq .kpi-lbl{color:var(--gray-400);}
+.kpi-val{font-family:'Playfair Display',serif;font-size:22px;line-height:1;letter-spacing:-.5px;}
+.kpi-val.pos{color:var(--confirmed);}
+.kpi-val.neg{color:var(--scarlet-dk);}
+.kpi-sub{font-size:9px;color:var(--gray-400);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;}
+.kpi-stats{display:flex;margin-top:8px;padding-top:8px;border-top:1px solid var(--gray-200);}
+.kpi-stat{flex:1;padding:0 4px;border-right:1px solid var(--gray-200);}
+.kpi-stat:first-child{padding-left:0;}
+.kpi-stat:last-child{border-right:none;}
+.ks-l{font-size:8px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.07em;}
+.ks-v{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--gray-900);margin-top:1px;}
+
+/* GROWTH HERO */
+.growth-hero{display:grid;grid-template-columns:repeat(3,1fr);}
+.gh-col{padding:14px 16px;border-right:1px solid var(--border);}
+.gh-col:last-child{border-right:none;}
+.gh-scenario{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;}
+.gh-scenario.sq{color:var(--gray-500);}
+.gh-scenario.reno{color:var(--gray-700);}
+.gh-scenario.newb{color:var(--scarlet);}
+.gh-vol{font-family:'Playfair Display',serif;font-size:28px;line-height:1;}
+.gh-vol.sq{color:var(--gray-500);}
+.gh-vol.reno{color:var(--gray-700);}
+.gh-vol.newb{color:var(--scarlet);}
+.gh-sub{font-size:9px;color:var(--gray-400);}
+.gh-delta{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;padding:2px 6px;border-radius:3px;margin-top:5px;}
+.gh-delta.pos{background:var(--confirmed-lt);color:var(--confirmed);}
+.gh-delta.neutral{background:var(--gray-100);color:var(--gray-500);}
+
+/* SERVICE LINE TABLE */
+.sl-table{width:100%;border-collapse:collapse;font-size:11px;}
+.sl-table th{background:var(--gray-900);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;text-align:right;}
+.sl-table th:first-child{text-align:left;}
+.sl-table td{padding:6px 10px;border-bottom:1px solid var(--gray-100);text-align:right;font-family:'Barlow Condensed',sans-serif;font-size:11px;}
+.sl-table td:first-child{text-align:left;font-family:'Barlow',sans-serif;font-size:11px;color:var(--gray-700);font-weight:500;}
+.sl-table td input[type=number]{width:56px;padding:2px 4px;border:1px solid var(--border);border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-size:11px;text-align:center;outline:none;}
+.sl-table td input.cur-inp{background:var(--gray-50);color:var(--gray-700);}
+.sl-table td input.tgt-inp{background:var(--growth-lt);color:var(--gray-900);}
+.sl-table td input.tgt-inp:focus{border-color:var(--growth);}
+.sl-table td input.rev-inp{background:var(--confirmed-lt);color:var(--confirmed);}
+.sl-table td input.rev-inp:focus{border-color:var(--confirmed);}
+.sl-table tr:nth-child(even){background:var(--gray-50);}
+.sl-table tr:hover{background:var(--growth-lt);}
+.sl-table tr.grp td{background:var(--gray-800);color:var(--gray-300);font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;}
+.sl-table tr.tot td{background:var(--gray-900);color:var(--white);font-weight:700;}
+
+/* COST BUILDUP */
+.buildup-grid{display:grid;grid-template-columns:1fr 1fr;}
+.bd-col{border-right:1px solid var(--border);}
+.bd-col:last-child{border-right:none;}
+.bd-col-hdr{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;border-bottom:1px solid var(--border);}
+.bd-col:first-child .bd-col-hdr{color:var(--gray-700);background:var(--gray-100);}
+.bd-col:last-child .bd-col-hdr{color:var(--scarlet-dk);background:var(--scarlet-pale);}
+.brow{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 14px;border-bottom:1px solid var(--gray-100);}
+.brow.sub{background:var(--gray-50);border-top:1px solid var(--border);}
+.brow.tot{background:var(--gray-900);}
+.brow.tot .bl,.brow.tot .bv{color:var(--white);font-weight:700;}
+.brow.anchor{background:var(--confirmed-lt);border-left:3px solid var(--confirmed);}
+.brow.warn{background:var(--estimated-lt);border-left:3px solid var(--estimated-bd);}
+.bl{font-size:11px;color:var(--gray-700);}
+.bl-s{font-size:9px;color:var(--gray-400);font-family:'Barlow Condensed',monospace;margin-top:1px;}
+.bv{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;color:var(--gray-900);white-space:nowrap;}
+
+/* CHART */
+.chart-wrap{height:200px;position:relative;}
+.legend{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--gray-600);font-weight:500;}
+.leg-line{width:16px;height:3px;border-radius:2px;}
+
+/* PORTFOLIO */
+.portfolio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding:16px;}
+.port-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:box-shadow .15s,border-color .15s;position:relative;overflow:hidden;}
+.port-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.port-card:hover{box-shadow:var(--shadow-md);border-color:var(--scarlet);}
+.port-card-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray-900);margin-bottom:2px;}
+.port-card-bldg{font-size:10px;color:var(--gray-400);margin-bottom:10px;}
+.port-card-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.port-kpi{background:var(--gray-50);border-radius:4px;padding:7px 10px;}
+.port-kpi-lbl{font-size:9px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.07em;}
+.port-kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;margin-top:2px;}
+.port-kpi-val.pos{color:var(--confirmed);}
+.port-kpi-val.neg{color:var(--scarlet-dk);}
+.port-card-bar{display:flex;gap:6px;margin-top:10px;align-items:center;}
+.conf-bar{flex:1;height:4px;background:var(--gray-200);border-radius:2px;overflow:hidden;}
+.conf-fill{height:100%;background:var(--confirmed);border-radius:2px;transition:width .3s;}
+.conf-pct{font-size:9px;color:var(--gray-400);}
+
+/* DATA TRACKER MODAL */
+.tracker-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:600;align-items:flex-start;justify-content:center;padding-top:56px;}
+.tracker-wrap.open{display:flex;}
+.tracker-modal{background:var(--white);border-radius:var(--r);box-shadow:0 24px 64px rgba(0,0,0,.3);width:920px;max-width:96vw;max-height:84vh;overflow:hidden;display:flex;flex-direction:column;}
+.tracker-hd{background:var(--growth);color:white;padding:13px 18px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.tracker-hd-right{display:flex;align-items:center;gap:10px;}
+.tracker-x{background:none;border:none;color:white;font-size:20px;cursor:pointer;line-height:1;}
+.tracker-filters{background:var(--gray-800);padding:7px 18px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.tf{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:3px;border:1px solid var(--gray-600);background:none;color:var(--gray-400);cursor:pointer;transition:all .15s;}
+.tf:hover{color:var(--gray-200);border-color:var(--gray-400);}
+.tf.on{color:white;}
+.tf.on.f-all{background:var(--gray-600);border-color:var(--gray-500);}
+.tf.on.f-c{background:var(--confirmed);border-color:var(--confirmed);}
+.tf.on.f-e{background:var(--estimated);border-color:var(--estimated);}
+.tf.on.f-n{background:var(--needed);border-color:var(--needed);}
+.tracker-scroll{overflow-y:auto;flex:1;}
+.tracker-scroll::-webkit-scrollbar{width:4px;}
+.tracker-scroll::-webkit-scrollbar-thumb{background:var(--gray-200);}
+.t-dept-hdr{padding:9px 18px;background:var(--gray-50);border-bottom:1px solid var(--border);border-top:2px solid var(--border);display:flex;align-items:center;gap:10px;}
+.t-dept-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.t-dept-meta{font-size:10px;color:var(--gray-400);margin-left:auto;display:flex;gap:12px;}
+table.tt{width:100%;border-collapse:collapse;font-size:11px;}
+table.tt th{background:var(--gray-900);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 12px;text-align:left;}
+table.tt td{padding:6px 12px;border-bottom:1px solid var(--gray-100);vertical-align:top;}
+table.tt tr:nth-child(even){background:var(--gray-50);}
+table.tt tr:hover{background:var(--growth-lt);}
+.tracker-ft{padding:9px 18px;border-top:1px solid var(--border);background:var(--gray-50);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;font-size:11px;color:var(--gray-500);}
+.tracker-ft strong{color:var(--gray-900);}
+
+/* ADD DEPT MODAL */
+.modal-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;}
+.modal-wrap.open{display:flex;}
+.modal{background:var(--white);border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.25);width:580px;max-width:96vw;max-height:90vh;overflow-y:auto;}
+.modal-hd{background:var(--scarlet);color:white;padding:14px 18px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1;}
+.modal-x{background:none;border:none;color:white;font-size:20px;cursor:pointer;}
+.modal-body{padding:18px;}
+.modal-section{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--white);background:var(--gray-700);padding:5px 12px;margin:14px -18px 10px;}
+.modal-section:first-of-type{margin-top:0;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr;}
+.fg{display:flex;flex-direction:column;gap:3px;}
+.fg label{font-size:11px;font-weight:600;color:var(--gray-700);}
+.fg label .tag{vertical-align:middle;margin-left:4px;}
+.fg input,.fg select{padding:6px 8px;border:1px solid var(--border);border-radius:4px;font-family:'Barlow',sans-serif;font-size:12px;color:var(--gray-900);outline:none;}
+.fg input:focus,.fg select:focus{border-color:var(--scarlet);}
+.fg input.confirmed-inp{background:var(--confirmed-lt);border-color:var(--confirmed-bd);}
+.fg .hint{font-size:9px;color:var(--gray-400);font-style:italic;}
+.sl-adder{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:4px;}
+.sl-adder-hdr{background:var(--gray-800);color:var(--gray-300);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;}
+.sl-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:4px;padding:6px 8px;border-bottom:1px solid var(--gray-100);align-items:center;}
+.sl-row:last-child{border-bottom:none;}
+.sl-row input{padding:3px 5px;border:1px solid var(--border);border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-size:11px;width:100%;outline:none;}
+.sl-row input:focus{border-color:var(--growth);}
+.sl-del{background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:14px;padding:2px 4px;}
+.sl-del:hover{color:var(--scarlet);}
+.btn-add-row{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:none;border:1px dashed var(--border);border-radius:4px;padding:5px 10px;cursor:pointer;color:var(--gray-500);width:100%;margin-top:6px;}
+.btn-add-row:hover{border-color:var(--growth);color:var(--growth);}
+.modal-ft{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:white;}
+.btn{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:7px 18px;border-radius:4px;border:none;cursor:pointer;}
+.btn-cancel{background:var(--gray-100);color:var(--gray-700);}
+.btn-save{background:var(--scarlet);color:white;}
+.btn-save:hover{background:var(--scarlet-dk);}
+
+/* CF TABLE */
+table.cf{width:100%;border-collapse:collapse;font-size:11px;}
+table.cf th{background:var(--gray-900);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 9px;text-align:right;}
+table.cf th:first-child{text-align:left;}
+table.cf td{padding:5px 9px;border-bottom:1px solid var(--gray-200);text-align:right;font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--gray-700);}
+table.cf td:first-child{text-align:left;font-family:'Barlow',sans-serif;font-size:10px;color:var(--gray-600);font-weight:500;}
+table.cf tr.grp td{background:var(--gray-800);color:var(--gray-300);font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;}
+table.cf tr.tot td{background:var(--gray-900);color:var(--white);font-weight:700;}
+
+/* READINESS TABLE */
+table.rt{width:100%;border-collapse:collapse;font-size:11px;}
+table.rt th{background:var(--gray-900);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:7px 12px;text-align:left;}
+table.rt td{padding:6px 12px;border-bottom:1px solid var(--gray-100);vertical-align:top;font-size:11px;}
+table.rt tr:nth-child(even){background:var(--gray-50);}
+
+.view{display:none;}
+.view.active{display:contents;}
+.full-view{display:none;}
+.full-view.active{display:block;}
+
+@media(max-width:960px){
+  .main{grid-template-columns:1fr;padding:12px;}
+  .panel{position:static;}
+  .kpi-strip{grid-template-columns:1fr;}
+  .buildup-grid{grid-template-columns:1fr;}
+  .growth-hero{grid-template-columns:1fr;}
+  .header,.readiness-bar{padding-left:16px;padding-right:16px;}
+  .form-grid{grid-template-columns:1fr;}
+  .form-grid.three{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+  DEPARTMENT DATA — EDIT THIS SECTION TO ADD / UPDATE DEPARTMENTS
+  Each department is one object in the DEPARTMENTS array.
+  Copy an existing entry, change the values, save. That's it.
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+const DEPARTMENTS = [
+
+  // ── DEPARTMENT 1: Neuro Oncology Service Line ─────────────────────────
+  // Data sourced from MedROI_DataTemplate_NeuroOnc.xlsx
+  {
+    id: "neuroonc",
+    name: "Neuro Oncology",
+    building: "Doan Hall",
+    cc_code: "CC-NEUROONC",
+    color: "#BB0000",
+
+    // SPACE
+    nasf: 28000,            // Assumed / Placeholder — total program SF
+    nasf_confirmed: false,
+    target_sf: 28000,
+    gross_factor: 1.32,
+
+    // CONSTRUCTION $/SF — from Data Inputs tab
+    reno_sf: 450,           // Assumed: RVIA benchmark ~$400–500/SF (2024)
+    new_sf: 620,            // Assumed: healthcare new build benchmark ~$575–675/SF
+
+    // SOFT COSTS (% of hard cost)
+    sc_ae: 10, sc_pm: 3, sc_perm: 1.5, sc_ffe: 5, sc_it: 2.5, sc_oc: 2,
+    reno_cont: 10, new_cont: 8,
+
+    // VOLUME — from Data Inputs tab
+    cur_vol: 4800,          // Assumed — pull from EHR (CPT/DRG)
+    sq_vol: 5200,           // Estimated constrained growth ~4%/yr
+    reno_vol: 7200,         // Estimated: 40% leakage capture + market growth
+    new_vol: 9500,          // Estimated: full market capture in purpose-built space
+    turnaway: 21,           // Estimated: 1,100 deferred encounters / 52 weeks
+
+    // REVENUE & FINANCE — from Data Inputs tab
+    rev_enc: 1850,          // Blended: clinic $385 + infusion $2,800 + imaging $1,450 weighted
+    rev_gr: 4.0,            // Market growth ~4–6%/yr nationally (aging pop, incidence)
+    reno_opex: 3.2, new_opex: 2.6, sq_opex: 3.8,  // From Data Inputs tab
+    defer_maint: 20,        // CONFIRMED: $20M current deferred maintenance load
+    comply: 0.35,           // Compliance risk reserve ~$350K/yr
+    wacc: 6.5,              // Assumed — confirm with OSU treasury
+    horizon: 10, ramp: 3,   // 3-year ramp per Data Inputs tab
+
+    // SERVICE LINES — clinic, infusion, imaging (core Neuro Onc streams)
+    service_lines: [
+      { name:"Clinic visits (outpatient)", constrained:true,  cur:2800, reno:3900, newb:5200, rev:385  },
+      { name:"Infusion / chemotherapy",    constrained:true,  cur:1400, reno:2100, newb:2900, rev:2800 },
+      { name:"Imaging (MRI/CT)",           constrained:true,  cur:600,  reno:1200, newb:1400, rev:1450 },
+    ],
+
+    // DATA READINESS — from Data Tracker tab
+    readiness: [
+      { item:"Deferred maintenance load", value:"$20,000,000", status:"confirmed", owner:"Facilities Management", impact:"$2.2M/yr avoidance in NPV; confirmed per FM capital needs assessment" },
+      { item:"Annual patient encounters", value:"4,800 enc/yr (assumed)", status:"needed", owner:"Analytics / EHR", impact:"Foundation of all revenue projections — run by CPT family" },
+      { item:"Construction cost/SF — renovation", value:"$450/SF (benchmark)", status:"needed", owner:"Facilities / Capital Planning", impact:"Largest capex variable; get from facilities master plan" },
+      { item:"Construction cost/SF — new build", value:"$620/SF (benchmark)", status:"needed", owner:"Facilities / Capital Planning", impact:"Largest capex variable; get schematic design estimate" },
+      { item:"Total program SF requirements", value:"28,000 SF (assumed)", status:"needed", owner:"Design / Space Planning", impact:"Validate with Neuro Onc leadership and operational model" },
+      { item:"Market leakage — competitor volume", value:"2,200 enc/yr (proxy)", status:"needed", owner:"Strategy / Sg2 / Strata", impact:"Addressable market capture; confirm with claims-based leakage report" },
+      { item:"Net revenue/encounter — clinic", value:"$385 (blended est.)", status:"needed", owner:"Finance / Revenue Cycle", impact:"Pull from CDM by CPT; net of contractuals" },
+      { item:"Net revenue/encounter — infusion", value:"$2,800 (assumed)", status:"needed", owner:"Finance / Pharmacy", impact:"Oncology drug margin is primary value driver — critical to confirm" },
+      { item:"Payer mix — Neuro Onc", value:"48% Medicare / 31% Commercial", status:"needed", owner:"Revenue Cycle", impact:"Pull from EHR by payer class for last 12 months" },
+      { item:"Facilities operating cost — current", value:"$3,800,000/yr (assumed)", status:"needed", owner:"Facilities / Finance", impact:"Get utilities + maintenance labor + housekeeping from FM budget" },
+      { item:"Annual deferred maint. run rate", value:"$2,200,000/yr (assumed)", status:"estimated", owner:"Facilities Management", impact:"~11% of total deferred load/yr; replace with FY actual" },
+      { item:"Capacity-constrained volume (lost)", value:"1,100 enc/yr (proxy)", status:"estimated", owner:"Analytics / Dept. Manager", impact:"No turn-away data available; proxy from waitlist signal" },
+      { item:"Downstream revenue multiplier", value:"2.4x per clinic encounter", status:"estimated", owner:"Finance / Strategy", impact:"For every $1 clinic net rev, ~$2.40 additional downstream revenue" },
+      { item:"Discount rate (WACC)", value:"6.5% (national est.)", status:"needed", owner:"Finance / Treasury", impact:"Ask finance: what hurdle rate used for capital project NPV?" },
+      { item:"Financing rate and structure", value:"5.2% / 25-yr bond (est.)", status:"needed", owner:"Finance / Treasury", impact:"Confirm bond market rate and whether financed vs. cash" },
+      { item:"Equipment capital — infusion + imaging", value:"$6,000,000 (assumed)", status:"estimated", owner:"Clinical / Finance", impact:"Infusion chairs + imaging scanner; confirm with Medical Director" },
+      { item:"Annual staff turnover cost", value:"$420,000/yr (estimated)", status:"estimated", owner:"HR / Finance", impact:"15% turnover × $100K replacement; substandard space is a driver" },
+      { item:"Site/land availability — new build", value:"TBD", status:"needed", owner:"Real Estate / Strategy", impact:"Owned land available? If not, what is acquisition cost estimate?" },
+    ]
+  },
+
+  // ──────────────────────────────────────────────────────────────────────
+  // TO ADD A NEW DEPARTMENT: copy the block above, paste below this line,
+  // change the values, save the file. The tool loads it automatically.
+  // ──────────────────────────────────────────────────────────────────────
+
+];
+</script>
+<!-- END DEPARTMENT DATA ═══════════════════════════════════════════════ -->
+
+<header class="header">
+  <div class="header-inner">
+    <div class="wordmark">Tumbleweed<span>.</span></div>
+    <div class="dept-tabs" id="dept-tabs"></div>
+    <div class="hdr-actions">
+      <button class="btn-hdr btn-tracker" onclick="openTracker()">Data Tracker</button>
+      <button class="btn-hdr btn-portfolio" onclick="showPortfolio()">Portfolio View</button>
+      <button class="btn-hdr btn-add-dept" onclick="openModal()">+ Add Department</button>
+    </div>
+  </div>
+</header>
+
+<div class="tool-nav-wrap">
+  <div class="tool-nav" id="tool-nav">
+    <button class="tool-tab active" onclick="sw('growth',this)">Growth Model</button>
+    <button class="tool-tab" onclick="sw('buildup',this)">Design &amp; Construction</button>
+    <button class="tool-tab" onclick="sw('finance',this)">Financial Model</button>
+    <button class="tool-tab" onclick="sw('execsummary',this)">Executive Summary</button>
+  </div>
+</div>
+
+<div class="readiness-bar">
+  <div class="readiness-inner">
+    <div class="r-badge r-confirmed"><div class="r-dot"></div>Confirmed</div>
+    <div class="r-badge r-estimated"><div class="r-dot"></div>Estimated</div>
+    <div class="r-badge r-needed"><div class="r-dot"></div>Needed</div>
+    <div class="r-badge r-growth"><div class="r-dot"></div>Dept. growth target</div>
+    <div class="conf-score">Dept: <span id="dept-name-bar">—</span> · Confidence: <span id="conf">—</span></div>
+  </div>
+</div>
+
+<!-- PORTFOLIO VIEW (full width) -->
+<div id="portfolio-view" class="full-view" style="max-width:1600px;margin:0 auto;padding:18px 32px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">Portfolio Overview</div>
+      <div style="font-size:11px;color:var(--gray-400);margin-top:2px;">All departments · Click any card to open that department</div>
+    </div>
+    <button class="btn btn-cancel" onclick="hidePortfolio()" style="font-size:11px;">Back to Department View</button>
+  </div>
+  <div class="portfolio-grid" id="portfolio-grid"></div>
+</div>
+
+<!-- DEPARTMENT VIEW -->
+<div id="dept-view" class="main">
+
+  <!-- LEFT PANEL — dynamically rendered -->
+  <aside class="panel" id="left-panel" style="position:sticky;top:107px;">
+    <div class="panel-banner" id="panel-banner">
+      <div class="panel-name" id="panel-name">—</div>
+      <div class="panel-sub" id="panel-sub">—</div>
+    </div>
+    <div class="panel-scroll" id="panel-scroll"></div>
+  </aside>
+
+  <!-- RIGHT RESULTS -->
+  <section class="results" id="results-panel">
+
+    <div id="view-growth" class="view active">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Volume Trajectory — Year 5</div><div class="card-sub">Where does this department go depending on the investment decision?</div></div>
+        <div class="growth-hero">
+          <div class="gh-col"><div class="gh-scenario sq">Status Quo</div><div class="gh-vol sq" id="gh-sq">—</div><div class="gh-sub">encounters/yr by Yr 5</div><div class="gh-delta neutral" id="gh-sq-d">—</div></div>
+          <div class="gh-col"><div class="gh-scenario reno">Renovation</div><div class="gh-vol reno" id="gh-rn">—</div><div class="gh-sub">encounters/yr by Yr 5</div><div class="gh-delta pos" id="gh-rn-d">—</div></div>
+          <div class="gh-col"><div class="gh-scenario newb">New Build</div><div class="gh-vol newb" id="gh-nb">—</div><div class="gh-sub">encounters/yr by Yr 5</div><div class="gh-delta pos" id="gh-nb-d">—</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">10-Year Volume Trajectory</div><div class="card-sub">Constrained vs. invested scenarios</div></div>
+        <div style="padding:14px;"><div class="chart-wrap"><canvas id="volChart"></canvas></div>
+        <div class="legend">
+          <div class="leg-item"><div class="leg-line" style="background:#aaa;border-top:2px dashed #aaa;height:0"></div>Status Quo</div>
+          <div class="leg-item"><div class="leg-line" style="background:#444"></div>Renovation</div>
+          <div class="leg-item"><div class="leg-line" style="background:var(--scarlet)"></div>New Build</div>
+          <div class="leg-item"><div class="leg-line" style="background:var(--growth)"></div>Unmet demand gap</div>
+        </div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Service Line Detail</div><div class="card-sub">Gray inputs = current · Blue = growth targets · Green = revenue · All editable</div></div>
+        <div style="overflow-x:auto"><table class="sl-table"><thead><tr><th>Study / Service Type</th><th>Constrained?</th><th>Current/yr</th><th>Target Reno</th><th>Target New</th><th>Net $/enc</th><th>Current rev</th><th>New build rev</th></tr></thead><tbody id="sl-tbody"></tbody></table></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Revenue Gap — Cost of Constrained Space</div><div class="card-sub">Year 5 projected · based on volume targets × net rev/encounter</div></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);" id="rev-gap"></div>
+      </div>
+    </div>
+
+    <div id="view-buildup" class="view">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Cost Buildup — Transparent Math</div><div class="card-sub">Green = confirmed real data · Yellow = benchmark estimate</div></div>
+        <div class="buildup-grid"><div class="bd-col"><div class="bd-col-hdr">Renovation</div><div id="bd-reno"></div></div><div class="bd-col"><div class="bd-col-hdr">New Build</div><div id="bd-new"></div></div></div>
+      </div>
+    </div>
+
+    <div id="view-finance" class="view">
+      <div style="background:var(--confirmed-lt);border:1px solid var(--confirmed-bd);border-radius:var(--r);padding:9px 14px;font-size:10px;color:var(--confirmed);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <strong style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase;">Capex derived from space program · Revenue derived from growth model</strong>
+        <span style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;" id="capex-notice"></span>
+      </div>
+      <div class="kpi-strip">
+        <div class="kpi kpi-reno"><div class="kpi-lbl">Renovation</div><div class="kpi-val" id="kpi-r-npv">—</div><div class="kpi-sub">Net Present Value</div><div class="kpi-stats"><div class="kpi-stat"><div class="ks-l">IRR</div><div class="ks-v" id="kpi-r-irr">—</div></div><div class="kpi-stat"><div class="ks-l">Payback</div><div class="ks-v" id="kpi-r-pb">—</div></div><div class="kpi-stat"><div class="ks-l">ROI</div><div class="ks-v" id="kpi-r-roi">—</div></div></div></div>
+        <div class="kpi kpi-new"><div class="kpi-lbl">New Build</div><div class="kpi-val" id="kpi-n-npv">—</div><div class="kpi-sub">Net Present Value</div><div class="kpi-stats"><div class="kpi-stat"><div class="ks-l">IRR</div><div class="ks-v" id="kpi-n-irr">—</div></div><div class="kpi-stat"><div class="ks-l">Payback</div><div class="ks-v" id="kpi-n-pb">—</div></div><div class="kpi-stat"><div class="ks-l">ROI</div><div class="ks-v" id="kpi-n-roi">—</div></div></div></div>
+        <div class="kpi kpi-sq"><div class="kpi-lbl">Status Quo</div><div class="kpi-val neg" id="kpi-s-npv">—</div><div class="kpi-sub">Cost burden NPV</div><div class="kpi-stats"><div class="kpi-stat"><div class="ks-l">Ann. burden</div><div class="ks-v" id="kpi-s-ann">—</div></div><div class="kpi-stat"><div class="ks-l">vs Reno Δ</div><div class="ks-v" id="kpi-s-dr">—</div></div><div class="kpi-stat"><div class="ks-l">vs New Δ</div><div class="ks-v" id="kpi-s-dn">—</div></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Cumulative Net Cash Flow</div><div class="card-sub">$M</div></div>
+        <div style="padding:14px;"><div class="chart-wrap"><canvas id="cfChart"></canvas></div>
+        <div class="legend"><div class="leg-item"><div class="leg-line" style="background:#444"></div>Renovation</div><div class="leg-item"><div class="leg-line" style="background:var(--scarlet)"></div>New Build</div><div class="leg-item"><div class="leg-line" style="background:var(--gray-300)"></div>Status Quo</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Annual Cash Flow Detail</div><div class="card-sub">$M</div></div>
+        <div style="overflow-x:auto"><table class="cf"><thead><tr id="cf-head"></tr></thead><tbody id="cf-body"></tbody></table></div>
+      </div>
+    </div>
+
+    <div id="view-readiness" class="view">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Data Readiness Tracker</div><div class="card-sub">What you have · what you need · who owns it</div></div>
+        <table class="rt"><thead><tr><th>Data Point</th><th>Current Value</th><th>Status</th><th>Owner</th><th>Why It Matters</th></tr></thead><tbody id="rt-body"></tbody></table>
+      </div>
+    </div>
+
+
+    <div id="view-execsummary" class="view">
+      <!-- EXEC SUMMARY TOP BANNER -->
+      <div style="background:var(--gray-900);border-radius:var(--r);padding:18px 22px;margin-bottom:14px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--scarlet-lt);margin-bottom:4px;">Executive Summary</div>
+          <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--white);line-height:1.2;" id="es-title">—</div>
+          <div style="font-size:11px;color:var(--gray-400);margin-top:4px;" id="es-subtitle">—</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:9px;color:var(--gray-500);text-transform:uppercase;letter-spacing:.08em;">Model confidence</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--white);" id="es-confidence">—</div>
+          <div style="font-size:9px;color:var(--gray-400);" id="es-conf-detail">—</div>
+        </div>
+      </div>
+
+      <!-- RECOMMENDATION BOX -->
+      <div style="border:2px solid var(--scarlet);border-radius:var(--r);padding:14px 18px;margin-bottom:14px;background:var(--scarlet-pale);display:flex;align-items:flex-start;gap:14px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--scarlet);white-space:nowrap;margin-top:2px;">RECOMMENDATION</div>
+        <div style="font-size:13px;color:var(--gray-900);font-weight:500;line-height:1.5;" id="es-recommendation">—</div>
+      </div>
+
+      <!-- 3-COLUMN KPI STRIP -->
+      <div class="kpi-strip" style="margin-bottom:14px;">
+        <div class="kpi kpi-reno">
+          <div class="kpi-lbl">Renovation NPV</div>
+          <div class="kpi-val" id="es-reno-npv">—</div>
+          <div class="kpi-sub">10-Year Net Present Value</div>
+          <div class="kpi-stats">
+            <div class="kpi-stat"><div class="ks-l">IRR</div><div class="ks-v" id="es-reno-irr">—</div></div>
+            <div class="kpi-stat"><div class="ks-l">Payback</div><div class="ks-v" id="es-reno-pb">—</div></div>
+            <div class="kpi-stat"><div class="ks-l">Capex</div><div class="ks-v" id="es-reno-capex">—</div></div>
+          </div>
+        </div>
+        <div class="kpi kpi-new">
+          <div class="kpi-lbl">New Build NPV</div>
+          <div class="kpi-val" id="es-new-npv">—</div>
+          <div class="kpi-sub">10-Year Net Present Value</div>
+          <div class="kpi-stats">
+            <div class="kpi-stat"><div class="ks-l">IRR</div><div class="ks-v" id="es-new-irr">—</div></div>
+            <div class="kpi-stat"><div class="ks-l">Payback</div><div class="ks-v" id="es-new-pb">—</div></div>
+            <div class="kpi-stat"><div class="ks-l">Capex</div><div class="ks-v" id="es-new-capex">—</div></div>
+          </div>
+        </div>
+        <div class="kpi kpi-sq">
+          <div class="kpi-lbl">Status Quo Cost</div>
+          <div class="kpi-val neg" id="es-sq-npv">—</div>
+          <div class="kpi-sub">10-Year burden (no action)</div>
+          <div class="kpi-stats">
+            <div class="kpi-stat"><div class="ks-l">Annual burden</div><div class="ks-v" id="es-sq-ann">—</div></div>
+            <div class="kpi-stat"><div class="ks-l">Vs Reno Delta</div><div class="ks-v" id="es-sq-dr">—</div></div>
+            <div class="kpi-stat"><div class="ks-l">Vs New Delta</div><div class="ks-v" id="es-sq-dn">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TWO COLUMN NARRATIVE + VOLUME IMPACT -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Strategic Rationale</div><div class="card-sub">Why this investment matters</div></div>
+          <div style="padding:14px;display:flex;flex-direction:column;gap:10px;" id="es-rationale"></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Volume Impact — Year 5</div><div class="card-sub">Encounters unlocked by investment</div></div>
+          <div style="padding:14px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:12px;">
+              <div style="background:var(--gray-50);border-radius:6px;padding:10px 8px;">
+                <div style="font-size:9px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Status Quo</div>
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gray-500);" id="es-vol-sq">—</div>
+                <div style="font-size:9px;color:var(--gray-400);">enc/yr</div>
+              </div>
+              <div style="background:var(--gray-100);border-radius:6px;padding:10px 8px;border:1px solid var(--gray-200);">
+                <div style="font-size:9px;color:var(--gray-700);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Renovation</div>
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gray-800);" id="es-vol-rn">—</div>
+                <div style="font-size:9px;color:var(--gray-400);">enc/yr</div>
+              </div>
+              <div style="background:var(--scarlet-pale);border-radius:6px;padding:10px 8px;border:1px solid var(--scarlet-lt);">
+                <div style="font-size:9px;color:var(--scarlet);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">New Build</div>
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--scarlet);" id="es-vol-nb">—</div>
+                <div style="font-size:9px;color:var(--gray-400);">enc/yr</div>
+              </div>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:10px;">
+              <div style="font-size:9px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Revenue unlocked vs. status quo — Yr 5</div>
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;background:var(--gray-100);border-radius:4px;padding:7px 10px;">
+                  <div style="font-size:9px;color:var(--gray-500);">Renovation</div>
+                  <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--confirmed);" id="es-revgap-rn">—</div>
+                </div>
+                <div style="flex:1;background:var(--scarlet-pale);border-radius:4px;padding:7px 10px;">
+                  <div style="font-size:9px;color:var(--gray-500);">New Build</div>
+                  <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--scarlet);" id="es-revgap-nb">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KEY RISKS + DATA GAPS -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Key Assumptions &amp; Risks</div><div class="card-sub">What could change the model</div></div>
+          <div style="padding:14px;display:flex;flex-direction:column;gap:6px;" id="es-risks"></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Critical Data Gaps</div><div class="card-sub">Needed before final recommendation</div></div>
+          <div style="padding:14px;display:flex;flex-direction:column;gap:6px;" id="es-gaps"></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<!-- DATA TRACKER MODAL (cross-department) -->
+<div class="tracker-wrap" id="tracker-modal">
+  <div class="tracker-modal">
+    <div class="tracker-hd">
+      Data Tracker — All Departments
+      <div class="tracker-hd-right">
+        <span id="tracker-summary-hd" style="font-size:11px;font-weight:400;opacity:.8;"></span>
+        <button class="tracker-x" onclick="closeTracker()">×</button>
+      </div>
+    </div>
+    <div class="tracker-filters">
+      <span style="font-size:10px;color:var(--gray-400);font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;">Filter:</span>
+      <button class="tf f-all on" onclick="filterTracker('all',this)">All</button>
+      <button class="tf f-c" onclick="filterTracker('confirmed',this)">Confirmed</button>
+      <button class="tf f-e" onclick="filterTracker('estimated',this)">Estimated</button>
+      <button class="tf f-n" onclick="filterTracker('needed',this)">Needed</button>
+      <span style="margin-left:auto;font-size:10px;color:var(--gray-400);">Click any row to jump to that department</span>
+    </div>
+    <div class="tracker-scroll" id="tracker-body"></div>
+    <div class="tracker-ft">
+      <span id="tracker-ft-summary">—</span>
+      <span style="font-size:10px;color:var(--gray-400);">Replace "Needed" inputs with actuals to improve model confidence</span>
+    </div>
+  </div>
+</div>
+
+<!-- ADD DEPARTMENT MODAL -->
+<div class="modal-wrap" id="modal">
+  <div class="modal">
+    <div class="modal-hd">Add Department <button class="modal-x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="modal-section">Department Info</div>
+      <div class="form-grid">
+        <div class="fg"><label>Department name</label><input type="text" id="m-name" placeholder="e.g. Cardiovascular Surgery"></div>
+        <div class="fg"><label>Building</label><input type="text" id="m-bldg" placeholder="e.g. Doan Hall, Rhodes Hall"></div>
+        <div class="fg"><label>Cost center code</label><input type="text" id="m-cc" placeholder="e.g. CC12345"></div>
+        <div class="fg"><label>Current footprint (NASF) <span class="tag tag-c">✓ from floor plan</span></label><input type="number" id="m-nasf" placeholder="SF from floor plan" class="confirmed-inp"><div class="hint">Read directly from your floor plan document</div></div>
+      </div>
+
+      <div class="modal-section">Space Program</div>
+      <div class="form-grid three">
+        <div class="fg"><label>Target program SF <span class="tag tag-e">est.</span></label><input type="number" id="m-tsf" placeholder="3000" value="3000"></div>
+        <div class="fg"><label>Grossing factor</label><input type="number" id="m-gf" placeholder="1.32" value="1.32" step="0.01"></div>
+        <div class="fg"><label>Reno $/SF <span class="tag tag-n">needed</span></label><input type="number" id="m-rsf" placeholder="450" value="450"></div>
+        <div class="fg"><label>New build $/SF <span class="tag tag-n">needed</span></label><input type="number" id="m-nsf" placeholder="620" value="620"></div>
+        <div class="fg"><label>Reno contingency %</label><input type="number" id="m-rc" placeholder="10" value="10"></div>
+        <div class="fg"><label>New build contingency %</label><input type="number" id="m-nc" placeholder="8" value="8"></div>
+      </div>
+
+      <div class="modal-section">Soft Costs (% of Hard Cost)</div>
+      <div class="form-grid three">
+        <div class="fg"><label>A&E fees %</label><input type="number" id="m-ae" value="10" step="0.5"></div>
+        <div class="fg"><label>Owner PM %</label><input type="number" id="m-pm" value="3" step="0.5"></div>
+        <div class="fg"><label>Permits & testing %</label><input type="number" id="m-perm" value="1.5" step="0.25"></div>
+        <div class="fg"><label>FF&E %</label><input type="number" id="m-ffe" value="5" step="0.5"></div>
+        <div class="fg"><label>IT / AV %</label><input type="number" id="m-it" value="2.5" step="0.25"></div>
+        <div class="fg"><label>Owner's contingency %</label><input type="number" id="m-oc" value="2" step="0.25"></div>
+      </div>
+
+      <div class="modal-section">Volume & Growth Targets</div>
+      <div class="form-grid">
+        <div class="fg"><label>Current annual volume <span class="tag tag-n">needed</span></label><input type="number" id="m-cur-vol" placeholder="e.g. 1800"></div>
+        <div class="fg"><label>Status quo Yr 5 volume <span class="tag tag-e">est.</span></label><input type="number" id="m-sq-vol" placeholder="constrained growth"></div>
+        <div class="fg"><label>Target Yr 5 — renovation <span class="tag tag-g">dept. target</span></label><input type="number" id="m-reno-vol" placeholder="achievable with reno"></div>
+        <div class="fg"><label>Target Yr 5 — new build <span class="tag tag-g">dept. target</span></label><input type="number" id="m-new-vol" placeholder="achievable with new build"></div>
+        <div class="fg"><label>Weekly turn-aways <span class="tag tag-n">needed</span></label><input type="number" id="m-ta" placeholder="patients/week"></div>
+        <div class="fg"><label>Ramp-up to full volume (yrs)</label><input type="number" id="m-ramp" value="2"></div>
+      </div>
+
+      <div class="modal-section">Revenue & Finance</div>
+      <div class="form-grid">
+        <div class="fg"><label>Net rev / encounter (blended $) <span class="tag tag-n">needed</span></label><input type="number" id="m-rev-enc" placeholder="e.g. 1550"></div>
+        <div class="fg"><label>Annual rev growth rate %</label><input type="number" id="m-rev-gr" value="4.5" step="0.25"></div>
+        <div class="fg"><label>Annual opex — renovation ($M)</label><input type="number" id="m-ro" step="0.1" placeholder="1.4"></div>
+        <div class="fg"><label>Annual opex — new build ($M)</label><input type="number" id="m-no" step="0.1" placeholder="1.1"></div>
+        <div class="fg"><label>Annual opex — status quo ($M) <span class="tag tag-n">needed</span></label><input type="number" id="m-so" step="0.1" placeholder="1.8"></div>
+        <div class="fg"><label>Deferred maintenance ($M) <span class="tag tag-c">shared</span></label><input type="number" id="m-dm" value="20" class="confirmed-inp"></div>
+        <div class="fg"><label>Compliance risk ($M/yr)</label><input type="number" id="m-cy" value="0.2" step="0.05"></div>
+        <div class="fg"><label>WACC % <span class="tag tag-n">needed</span></label><input type="number" id="m-wacc" value="6.5" step="0.25"></div>
+        <div class="fg"><label>Model horizon (years)</label><input type="number" id="m-hz" value="10"></div>
+      </div>
+
+      <div class="modal-section">Service Lines</div>
+      <p style="font-size:11px;color:var(--gray-500);margin-bottom:8px;">Add the study/service types for this department. These drive the growth model and revenue calculations.</p>
+      <div class="sl-adder">
+        <div class="sl-adder-hdr">
+          <span>Service type · Current vol · Reno target · New target · Net $/enc</span>
+          <span style="font-size:9px;">Blue = editable</span>
+        </div>
+        <div id="modal-sl-rows"></div>
+      </div>
+      <button class="btn-add-row" onclick="addSLRow()">+ Add service type</button>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-save" onclick="saveDept()">Add Department</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// ENGINE — do not edit below this line unless you are a developer
+// ═══════════════════════════════════════════════════════════════════════
+
+let activeDeptId = DEPARTMENTS[0].id;
+let currentView = 'growth';
+
+const $=id=>document.getElementById(id);
+const fmtM=(v,d=1)=>v>=0?`$${Math.abs(v).toFixed(d)}M`:`($${Math.abs(v).toFixed(d)}M)`;
+const fmtPct=v=>isFinite(v)?`${(v*100).toFixed(1)}%`:'N/A';
+const fmtYr=v=>isFinite(v)&&v>0&&v<100?`${v.toFixed(1)} yrs`:'N/A';
+const fmtD=v=>'$'+Math.round(v).toLocaleString();
+const fmtN=v=>Math.round(v).toLocaleString();
+
+function getDept(){ return DEPARTMENTS.find(d=>d.id===activeDeptId)||DEPARTMENTS[0]; }
+
+// ── SLIDER RENDERING ────────────────────────────────────────────────────
+function sliderHTML(id,min,max,step,val,cls,valId,fmtFn){
+  return `<div class="sr"><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}" class="${cls}" oninput="onSlide(this,'${valId}',${fmtFn})"></div>`;
+}
+
+function onSlide(el,valId,fmtFn){
+  const pct=((el.value-el.min)/(el.max-el.min))*100;
+  el.style.setProperty('--pct',pct+'%');
+  $(valId).textContent=fmtFn(el.value);
+  // Write back to dept object
+  const d=getDept();
+  const map={
+    nasf:'nasf',tsf:'target_sf',gf:'gross_factor',
+    rsf:'reno_sf',nsf:'new_sf',
+    ae:'sc_ae',pm:'sc_pm',perm:'sc_perm',ffe:'sc_ffe',it:'sc_it',oc:'sc_oc',
+    rc:'reno_cont',nc:'new_cont',
+    cur_vol:'cur_vol',sq_vol:'sq_vol',reno_vol:'reno_vol',new_vol:'new_vol',ta:'turnaway',
+    rev_enc:'rev_enc',rev_gr:'rev_gr',
+    ro:'reno_opex',no:'new_opex',so:'sq_opex',dm:'defer_maint',cy:'comply',
+    wacc:'wacc',hz:'horizon',ramp:'ramp'
+  };
+  const key=el.id;
+  if(map[key]) d[map[key]]=parseFloat(el.value);
+  calc();
+}
+
+function initSliderPcts(){
+  document.querySelectorAll('input[type=range]').forEach(el=>{
+    const pct=((el.value-el.min)/(el.max-el.min))*100;
+    el.style.setProperty('--pct',pct+'%');
+  });
+}
+
+// ── LEFT PANEL ──────────────────────────────────────────────────────────
+function renderPanel(){
+  const d=getDept();
+  $('panel-banner').style.background=d.color;
+  $('panel-name').textContent=d.name;
+  $('panel-sub').textContent=`${d.building} · ${d.cc_code} · Adjust to update model`;
+
+  const s=(id,min,max,step,val,cls='',fmtFn="v=>v")=>{
+    const pct=((val-min)/(max-min))*100;
+    return `<div class="sr"><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}" class="${cls}" style="--pct:${pct}%" oninput="onSlide(this,'v_${id}',${fmtFn})"></div>`;
+  };
+  const ig=(lbl,id,tag,vbCls,val,min,max,step,slCls,fmtFn,note='')=>
+    `<div class="ig"><div class="ig-hdr"><span class="ig-lbl">${lbl}</span><div class="ig-right"><span class="tag ${tag}"></span><span id="v_${id}" class="vb ${vbCls}">${val}</span></div></div>${s(id,min,max,step,parseFloat(val),slCls,fmtFn)}${note?`<div class="note ${note.cls}">${note.txt}</div>`:''}</div>`;
+
+  let html='';
+
+  // Growth targets
+  html+=`<div class="sec-lbl" style="background:var(--growth)">Dept. Growth Targets</div>`;
+  html+=ig('Current annual volume','cur_vol','tag-n','n',d.cur_vol,100,10000,50,'gr',"v=>Math.round(v).toLocaleString()",{cls:'flg',txt:'Pull from EHR — all encounter types'});
+  html+=ig('Yr 5 target — renovation','reno_vol','tag-g','g',d.reno_vol,100,15000,50,'gr',"v=>Math.round(v).toLocaleString()",{cls:'grw',txt:'What can be achieved with a renovated space?'});
+  html+=ig('Yr 5 target — new build','new_vol','tag-g','g',d.new_vol,100,20000,50,'gr',"v=>Math.round(v).toLocaleString()",{cls:'grw',txt:'Full program capacity in purpose-built space'});
+  html+=ig('Status quo Yr 5 (constrained)','sq_vol','tag-e','',d.sq_vol,100,8000,50,'',"v=>Math.round(v).toLocaleString()");
+  html+=ig('Weekly turn-aways / deferrals','ta','tag-n','n',d.turnaway,0,100,1,'gr',"v=>v+'/wk'",{cls:'flg',txt:'Ask dept manager: who can\'t get scheduled?'});
+
+  // Space
+  html+=`<div class="sec-lbl" style="background:var(--gray-700)">Space Program</div>`;
+  html+=`<div class="ig"><div class="ig-hdr"><span class="ig-lbl">Current footprint (NASF)</span><div class="ig-right"><span class="tag ${d.nasf_confirmed?'tag-c':'tag-n'}">${d.nasf_confirmed?'✓ Confirmed':'! Needed'}</span><span id="v_nasf" class="vb ${d.nasf_confirmed?'c':'n'}">${Math.round(d.nasf).toLocaleString()} SF</span></div></div>${s('nasf',100,10000,10,d.nasf,d.nasf_confirmed?'co':'','v=>Math.round(v).toLocaleString()+\' SF\'')}<div class="note src">Source: ${d.building} floor plan · ${d.cc_code}</div></div>`;
+  html+=ig('Target program SF','tsf','tag-e','',Math.round(d.target_sf).toLocaleString()+' SF',500,15000,100,'',"v=>Math.round(v).toLocaleString()+' SF'");
+  html+=ig('Grossing factor','gf','tag-e','',d.gross_factor.toFixed(2)+'x',1.1,1.6,0.01,'',"v=>parseFloat(v).toFixed(2)+'x'");
+
+  // Construction
+  html+=`<div class="sec-lbl" style="background:var(--gray-700)">Construction $/SF</div>`;
+  html+=ig('Renovation $/SF','rsf','tag-n','n','$'+d.reno_sf,250,800,10,'',"v=>'$'+v",{cls:'flg',txt:'Replace with OSU campus actuals'});
+  html+=ig('New build $/SF','nsf','tag-n','n','$'+d.new_sf,350,1000,10,'',"v=>'$'+v",{cls:'flg',txt:'Academic medical center likely $650–800+'});
+
+  // Soft costs
+  html+=`<div class="sec-lbl" style="background:var(--gray-700)">Soft Costs (% of hard cost)</div>`;
+  const sc=[['A&E fees','ae',d.sc_ae],['Owner PM','pm',d.sc_pm],['Permits','perm',d.sc_perm],['FF&E','ffe',d.sc_ffe],['IT/AV','it',d.sc_it],["Owner's cont.",'oc',d.sc_oc]];
+  sc.forEach(([lbl,id,val])=>{ html+=ig(lbl,id,'tag-e','',val+'%',0,18,0.5,'',"v=>v+'%'"); });
+  html+=ig('Reno contingency','rc','tag-e','',d.reno_cont+'%',3,25,0.5,'',"v=>v+'%'");
+  html+=ig('New build contingency','nc','tag-e','',d.new_cont+'%',3,20,0.5,'',"v=>v+'%'");
+
+  // Revenue
+  html+=`<div class="sec-lbl" style="background:var(--gray-700)">Revenue & Finance</div>`;
+  html+=ig('Net rev/encounter (blended $)','rev_enc','tag-n','n','$'+d.rev_enc.toLocaleString(),100,50000,100,'',"v=>'$'+parseInt(v).toLocaleString()",{cls:'flg',txt:'Pull from CDM by CPT code'});
+  html+=ig('Annual rev growth %','rev_gr','tag-e','',d.rev_gr+'%',0,12,0.25,'',"v=>parseFloat(v).toFixed(1)+'%'");
+  html+=ig('Annual opex — renovation','ro','tag-e','','$'+d.reno_opex+'M',0.1,10,0.1,'',"v=>'$'+parseFloat(v).toFixed(1)+'M'");
+  html+=ig('Annual opex — new build','no','tag-e','','$'+d.new_opex+'M',0.1,10,0.1,'',"v=>'$'+parseFloat(v).toFixed(1)+'M'");
+  html+=ig('Annual opex — status quo','so','tag-n','n','$'+d.sq_opex+'M',0.1,12,0.1,'',"v=>'$'+parseFloat(v).toFixed(1)+'M'",{cls:'flg',txt:'Actual FM operating cost from facilities budget'});
+  html+=`<div class="ig"><div class="ig-hdr"><span class="ig-lbl">Deferred maintenance</span><div class="ig-right"><span class="tag tag-c">✓ Confirmed</span><span id="v_dm" class="vb c">$${d.defer_maint}M</span></div></div>${s('dm',1,60,0.5,d.defer_maint,'co',"v=>'$'+parseFloat(v).toFixed(1)+'M'")}<div class="note src">Confirmed · Annual run rate ~$${(d.defer_maint*0.11).toFixed(1)}M/yr</div></div>`;
+  html+=ig('Compliance risk ($M/yr)','cy','tag-e','','$'+d.comply+'M',0,3,0.05,'',"v=>'$'+parseFloat(v).toFixed(2)+'M'");
+  html+=ig('WACC %','wacc','tag-n','n',d.wacc+'%',2,14,0.25,'',"v=>parseFloat(v).toFixed(2)+'%'",{cls:'flg',txt:'Confirm with OSU Wexner treasury'});
+  html+=ig('Model horizon','hz','tag-e','',d.horizon+' yrs',5,30,5,'',"v=>v+' yrs'");
+  html+=ig('Ramp-up to full volume','ramp','tag-e','',d.ramp+' yrs',1,6,1,'',"v=>v+' yrs'");
+
+  $('panel-scroll').innerHTML=html;
+  initSliderPcts();
+}
+
+// ── SERVICE LINE TABLE ───────────────────────────────────────────────────
+function renderSLTable(){
+  const d=getDept();
+  let html='';
+  d.service_lines.forEach((sl,i)=>{
+    const cur=sl.cur, newb=sl.newb, rev=sl.rev;
+    html+=`<tr>
+      <td>${sl.name}</td>
+      <td style="text-align:center">${sl.constrained?'<span style="color:var(--needed);font-weight:700;">⚠ yes</span>':'<span style="color:var(--gray-400);">no</span>'}</td>
+      <td><input type="number" class="cur-inp" min="0" max="99999" value="${sl.cur}" data-dept="${d.id}" data-i="${i}" data-f="cur" onchange="updateSL(this)"></td>
+      <td><input type="number" class="tgt-inp" min="0" max="99999" value="${sl.reno}" data-dept="${d.id}" data-i="${i}" data-f="reno" onchange="updateSL(this)"></td>
+      <td><input type="number" class="tgt-inp" min="0" max="99999" value="${sl.newb}" data-dept="${d.id}" data-i="${i}" data-f="newb" onchange="updateSL(this)"></td>
+      <td><input type="number" class="rev-inp" min="0" max="999999" value="${sl.rev}" data-dept="${d.id}" data-i="${i}" data-f="rev" onchange="updateSL(this)"></td>
+      <td style="color:var(--confirmed);font-weight:700;">${fmtD(cur*rev)}</td>
+      <td style="color:var(--scarlet);font-weight:700;">${fmtD(newb*rev)}</td>
+    </tr>`;
+  });
+  const totCur=d.service_lines.reduce((s,sl)=>s+sl.cur,0);
+  const totNew=d.service_lines.reduce((s,sl)=>s+sl.newb,0);
+  const totCurRev=d.service_lines.reduce((s,sl)=>s+sl.cur*sl.rev,0);
+  const totNewRev=d.service_lines.reduce((s,sl)=>s+sl.newb*sl.rev,0);
+  html+=`<tr class="tot"><td>Total</td><td></td><td>${fmtN(totCur)}</td><td></td><td>${fmtN(totNew)}</td><td></td><td>${fmtD(totCurRev)}</td><td>${fmtD(totNewRev)}</td></tr>`;
+  $('sl-tbody').innerHTML=html;
+}
+
+function updateSL(el){
+  const d=DEPARTMENTS.find(dep=>dep.id===el.dataset.dept);
+  if(d) d.service_lines[parseInt(el.dataset.i)][el.dataset.f]=parseInt(el.value)||0;
+  calc();
+}
+
+// ── COST BUILDUP ────────────────────────────────────────────────────────
+function computeCapex(d){
+  const gSF=d.target_sf*d.gross_factor;
+  const soft=(d.sc_ae+d.sc_pm+d.sc_perm+d.sc_ffe+d.sc_it+d.sc_oc)/100;
+  const hR=gSF*d.reno_sf, hN=gSF*d.new_sf;
+  const sR=hR*soft, sN=hN*soft;
+  const cR=(hR+sR)*d.reno_cont/100, cN=(hN+sN)*d.new_cont/100;
+  return{gSF,soft,hR,hN,sR,sN,cR,cN,totR:(hR+sR+cR)/1e6,totN:(hN+sN+cN)/1e6};
+}
+
+function renderBuildup(d,cap){
+  function col(isReno){
+    const h=isReno?cap.hR:cap.hN,s=isReno?cap.sR:cap.sN,c=isReno?cap.cR:cap.cN;
+    const sf=isReno?d.reno_sf:d.new_sf,cont=(isReno?d.reno_cont:d.new_cont);
+    const total=h+s+c;
+    const soft=d.sc_ae+d.sc_pm+d.sc_perm+d.sc_ffe+d.sc_it+d.sc_oc;
+    let html='';
+    html+=`<div class="brow anchor"><span class="bl">Current footprint (${d.nasf_confirmed?'confirmed':'floor plan'})<div class="bl-s">${d.building} · ${d.cc_code} · ${d.nasf.toFixed(2)} NASF</div></span><span class="bv" style="color:var(--confirmed)">${fmtN(d.nasf)} SF</span></div>`;
+    html+=`<div class="brow"><span class="bl">Target program SF<div class="bl-s">${fmtN(d.target_sf)} NASF × ${d.gross_factor.toFixed(2)}x = ${fmtN(cap.gSF)} gross SF</div></span><span class="bv">${fmtN(cap.gSF)} SF</span></div>`;
+    html+=`<div class="brow warn"><span class="bl">× $/SF — ${isReno?'renovation':'new build'}<div class="bl-s">${fmtN(cap.gSF)} SF × $${sf}/SF</div></span><span class="bv" style="color:var(--estimated)">${fmtD(h)}</span></div>`;
+    html+=`<div class="brow sub"><span class="bl">= Hard cost</span><span class="bv">${fmtD(h)}</span></div>`;
+    [['A&E',d.sc_ae],['Owner PM',d.sc_pm],['Permits',d.sc_perm],['FF&E',d.sc_ffe],['IT/AV',d.sc_it],["Owner's cont.",d.sc_oc]].forEach(([lbl,pct])=>{if(pct>0)html+=`<div class="brow"><span class="bl">+ ${lbl}<div class="bl-s">${pct}%</div></span><span class="bv">${fmtD(h*pct/100)}</span></div>`;});
+    html+=`<div class="brow sub"><span class="bl">= Soft costs (${soft.toFixed(1)}%)</span><span class="bv">${fmtD(s)}</span></div>`;
+    html+=`<div class="brow sub"><span class="bl">Hard + soft</span><span class="bv">${fmtD(h+s)}</span></div>`;
+    html+=`<div class="brow"><span class="bl">+ Construction contingency (${cont}%)</span><span class="bv">${fmtD(c)}</span></div>`;
+    html+=`<div class="brow tot"><span class="bl" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.06em;">ALL-IN CAPEX</span><span class="bv" style="font-size:15px;">${fmtD(total)}</span></div>`;
+    html+=`<div class="brow" style="background:var(--gray-50)"><span class="bl" style="color:var(--gray-400);font-size:9px;">= $${Math.round(total/cap.gSF)}/gross SF all-in</span></div>`;
+    return html;
+  }
+  $('bd-reno').innerHTML=col(true);
+  $('bd-new').innerHTML=col(false);
+}
+
+// ── FINANCIAL MATH ──────────────────────────────────────────────────────
+function calcIRR(cfs,g=.1){let r=g;for(let i=0;i<300;i++){let n=0,dd=0;cfs.forEach((cf,t)=>{const disc=Math.pow(1+r,t);n+=cf/disc;dd-=t*cf/(disc*(1+r));});if(Math.abs(dd)<1e-12)break;const nr=r-n/dd;if(Math.abs(nr-r)<1e-9)return nr;r=isFinite(nr)?nr:g;}return NaN;}
+function calcNPV(rate,cfs){return cfs.reduce((s,cf,t)=>s+cf/Math.pow(1+rate,t),0);}
+function payback(cum){for(let i=1;i<cum.length;i++)if(cum[i]>=0)return i-cum[i-1]/(cum[i]-cum[i-1]);return NaN;}
+function cumSum(arr){return arr.reduce((a,v,i)=>[...a,(a[i-1]||0)+v],[]);}
+function rampF(yr,r){if(yr<=0)return 0;if(yr>=r)return 1;return yr/r;}
+function volTraj(cur,tgt5,hz,constrained){
+  return Array.from({length:hz+1},(_,t)=>{
+    if(t===0)return cur;
+    if(t<=5)return Math.round(cur+(tgt5-cur)*(t/5));
+    return Math.round(tgt5*Math.pow(1+(constrained?.01:.03),t-5));
+  });
+}
+
+// ── MAIN CALC ───────────────────────────────────────────────────────────
+function calc(){
+  const d=getDept();
+  const cap=computeCapex(d);
+  const hz=d.horizon;
+  const wacc=d.wacc/100;
+  const annDefer=d.defer_maint*0.11;
+  const revGr=d.rev_gr/100;
+
+  // Volume trajectories
+  const sqT=volTraj(d.cur_vol,d.sq_vol,hz,true);
+  const rnT=volTraj(d.cur_vol,d.reno_vol,hz,false);
+  const nbT=volTraj(d.cur_vol,d.new_vol,hz,false);
+  const gapT=nbT.map((v,t)=>Math.max(0,v-sqT[t]));
+
+  // Growth hero
+  $('gh-sq').textContent=fmtN(d.sq_vol);
+  $('gh-rn').textContent=fmtN(d.reno_vol);
+  $('gh-nb').textContent=fmtN(d.new_vol);
+  const delt=(id,v)=>{const el=$(id);el.textContent=(v>=0?'+':'')+fmtN(v)+' vs today';el.className='gh-delta '+(v>0?'pos':'neutral');};
+  delt('gh-sq-d',d.sq_vol-d.cur_vol);
+  delt('gh-rn-d',d.reno_vol-d.cur_vol);
+  delt('gh-nb-d',d.new_vol-d.cur_vol);
+
+  // Volume chart
+  const labels=sqT.map((_,t)=>t===0?'Today':'Yr '+t);
+  volChart.data.labels=labels;
+  volChart.data.datasets[0].data=sqT;
+  volChart.data.datasets[1].data=rnT;
+  volChart.data.datasets[2].data=nbT;
+  volChart.data.datasets[3].data=gapT;
+  volChart.update('none');
+
+  // Revenue gap
+  const sqRevYr5=d.sq_vol*d.rev_enc, rnRevYr5=d.reno_vol*d.rev_enc, nbRevYr5=d.new_vol*d.rev_enc;
+  const curRev=d.service_lines.reduce((s,sl)=>s+sl.cur*sl.rev,0);
+  $('rev-gap').innerHTML=[
+    {lbl:'Status quo vs. today',val:sqRevYr5-curRev,sub:'Constrained growth · Yr 5'},
+    {lbl:'Renovation vs. status quo',val:rnRevYr5-sqRevYr5,sub:'Rev unlocked by renovation · Yr 5'},
+    {lbl:'New build vs. status quo',val:nbRevYr5-sqRevYr5,sub:'Rev unlocked by new build · Yr 5'},
+  ].map((item,i)=>`<div style="padding:14px;${i<2?'border-right:1px solid var(--border)':''}">
+    <div style="font-size:9px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">${item.lbl}</div>
+    <div style="font-family:'Playfair Display',serif;font-size:24px;color:${item.val>=0?'var(--confirmed)':'var(--scarlet-dk)'};">${item.val>=0?'+':''}${fmtD(item.val)}</div>
+    <div style="font-size:9px;color:var(--gray-400);margin-top:2px;">${item.sub}</div>
+  </div>`).join('');
+
+  // Service line table
+  renderSLTable();
+
+  // Cost buildup
+  renderBuildup(d,cap);
+
+  // Cash flows — revenue derived from volume × rev/enc
+  const years=Array.from({length:hz+1},(_,i)=>i);
+  const rnCF=years.map(t=>{
+    if(t===0)return -cap.totR;
+    return rnT[t]*d.rev_enc*Math.pow(1+revGr,t)/1e6-d.reno_opex*Math.pow(1.025,t)+annDefer;
+  });
+  const nbCF=years.map(t=>{
+    if(t===0)return -cap.totN;
+    return nbT[t]*d.rev_enc*Math.pow(1+revGr,t)/1e6-d.new_opex*Math.pow(1.022,t)+annDefer;
+  });
+  const sqCF=years.map(t=>{
+    if(t===0)return 0;
+    return sqT[t]*d.rev_enc*Math.pow(1+revGr*.5,t)/1e6-d.sq_opex*Math.pow(1.03,t)-annDefer*Math.pow(1.05,t)-d.comply*Math.pow(1.03,t)-.1;
+  });
+
+  const cumR=cumSum(rnCF),cumN=cumSum(nbCF),cumS=cumSum(sqCF);
+  const rNPV=calcNPV(wacc,rnCF),nNPV=calcNPV(wacc,nbCF),sNPV=calcNPV(wacc,sqCF);
+  const rIRR=calcIRR(rnCF),nIRR=calcIRR(nbCF);
+  const pbR=payback(cumR),pbN=payback(cumN);
+  const rROI=(cumR[hz]+cap.totR)/cap.totR, nROI=(cumN[hz]+cap.totN)/cap.totN;
+  const annBurden=d.sq_opex+annDefer+d.comply+.1;
+
+  $('capex-notice').textContent=`Reno $${cap.totR.toFixed(1)}M · New $${cap.totN.toFixed(1)}M`;
+
+  const setN=(id,v,pos)=>{const el=$(id);el.textContent=fmtM(v);el.className='kpi-val '+(pos?'pos':'neg');};
+  setN('kpi-r-npv',rNPV,rNPV>=0); $('kpi-r-irr').textContent=fmtPct(rIRR); $('kpi-r-pb').textContent=fmtYr(pbR); $('kpi-r-roi').textContent=fmtPct(rROI);
+  setN('kpi-n-npv',nNPV,nNPV>=0); $('kpi-n-irr').textContent=fmtPct(nIRR); $('kpi-n-pb').textContent=fmtYr(pbN); $('kpi-n-roi').textContent=fmtPct(nROI);
+  $('kpi-s-npv').textContent=fmtM(sNPV); $('kpi-s-ann').textContent=fmtM(annBurden); $('kpi-s-dr').textContent=fmtM(rNPV-sNPV); $('kpi-s-dn').textContent=fmtM(nNPV-sNPV);
+
+  // CF chart
+  cfChart.data.labels=labels;
+  cfChart.data.datasets[0].data=cumR;
+  cfChart.data.datasets[1].data=cumN;
+  cfChart.data.datasets[2].data=cumS;
+  cfChart.update('none');
+
+  // CF table
+  $('cf-head').innerHTML='<th>Metric</th>'+years.map(t=>`<th>${t===0?'Y0':'Y'+t}</th>`).join('');
+  const trow=(lbl,vals)=>`<tr><td>${lbl}</td>${vals.map(v=>`<td style="color:${v<0?'var(--scarlet-dk)':'inherit'}">${fmtM(v)}</td>`).join('')}</tr>`;
+  $('cf-body').innerHTML=[
+    `<tr class="grp"><td colspan="${hz+2}">Renovation</td></tr>`,trow('Annual CF',rnCF),trow('Cumulative',cumR),
+    `<tr class="grp"><td colspan="${hz+2}">New Build</td></tr>`,trow('Annual CF',nbCF),trow('Cumulative',cumN),
+    `<tr class="grp"><td colspan="${hz+2}">Status Quo</td></tr>`,trow('Annual net',sqCF),trow('Cumulative',cumS),
+    `<tr class="tot"><td>NPV</td><td colspan="${hz+1}" style="text-align:left;padding-left:10px;">Reno: ${fmtM(rNPV)} · New: ${fmtM(nNPV)} · SQ: ${fmtM(sNPV)}</td></tr>`
+  ].join('');
+
+  // Readiness table
+  const statusMap={confirmed:'tag-c',estimated:'tag-e',needed:'tag-n'};
+  $('rt-body').innerHTML=d.readiness.map(r=>`<tr>
+    <td><strong>${r.item}</strong></td>
+    <td style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;">${r.value}</td>
+    <td><span class="tag ${statusMap[r.status]||'tag-e'}">${r.status}</span></td>
+    <td style="font-size:11px;">${r.owner}</td>
+    <td style="font-size:10px;color:var(--gray-500);">${r.impact}</td>
+  </tr>`).join('');
+
+  // Confidence score
+  const conf=d.readiness.filter(r=>r.status==='confirmed').length;
+  const est=d.readiness.filter(r=>r.status==='estimated').length;
+  const need=d.readiness.filter(r=>r.status==='needed').length;
+  const score=Math.round((conf*100+est*50)/(conf+est+need));
+  $('conf').textContent=`${score}% · ${conf} confirmed · ${est} estimated · ${need} needed`;
+  $('dept-name-bar').textContent=d.name;
+
+  // Dept color on tab line
+  document.querySelectorAll('.dept-tab').forEach(t=>{
+    if(t.dataset.id===d.id) t.style.borderBottomColor=d.color;
+  });
+
+  // Store for portfolio
+  d._cache={rNPV,nNPV,sNPV,rIRR,nIRR,pbR,pbN,score,cap};
+}
+
+// ── CHARTS ──────────────────────────────────────────────────────────────
+const volChart=new Chart($('volChart').getContext('2d'),{
+  type:'line',
+  data:{labels:[],datasets:[
+    {label:'Status Quo',data:[],borderColor:'#bbb',borderDash:[5,4],tension:.4,pointRadius:2,borderWidth:1.5,fill:false},
+    {label:'Renovation',data:[],borderColor:'#444',tension:.4,pointRadius:2,borderWidth:2,fill:false},
+    {label:'New Build',data:[],borderColor:'#BB0000',tension:.4,pointRadius:3,borderWidth:2.5,fill:false},
+    {label:'Unmet demand',data:[],borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.08)',tension:.4,pointRadius:2,borderWidth:1.5,fill:true},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString()} enc/yr`}}},
+    scales:{x:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Barlow Condensed',size:11},color:'#666'}},y:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Barlow Condensed',size:11},color:'#666',callback:v=>v.toLocaleString()}}}}
+});
+
+const cfChart=new Chart($('cfChart').getContext('2d'),{
+  type:'line',
+  data:{labels:[],datasets:[
+    {label:'Renovation',data:[],borderColor:'#444',tension:.35,pointRadius:3,borderWidth:2.5,fill:false},
+    {label:'New Build',data:[],borderColor:'#BB0000',tension:.35,pointRadius:3,borderWidth:2.5,fill:false},
+    {label:'Status Quo',data:[],borderColor:'#bbb',borderDash:[5,4],tension:.35,pointRadius:2,borderWidth:1.5,fill:false},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmtM(c.parsed.y)}`}}},
+    scales:{x:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Barlow Condensed',size:11},color:'#666'}},y:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Barlow Condensed',size:11},color:'#666',callback:v=>`$${v.toFixed(0)}M`}}}}
+});
+
+// ── TABS & VIEW ──────────────────────────────────────────────────────────
+function renderDeptTabs(){
+  const container=$('dept-tabs');
+  container.innerHTML='';
+  DEPARTMENTS.forEach(d=>{
+    const btn=document.createElement('button');
+    btn.className='dept-tab'+(d.id===activeDeptId?' active':'');
+    btn.dataset.id=d.id;
+    btn.innerHTML=`<span class="dot"></span>${d.name}`;
+    if(d.id===activeDeptId) btn.style.borderBottomColor=d.color;
+    btn.onclick=()=>switchDept(d.id);
+    container.appendChild(btn);
+  });
+}
+
+function switchDept(id){
+  activeDeptId=id;
+  renderDeptTabs();
+  renderPanel();
+  calc();
+  hidePortfolio();
+}
+
+function sw(v,btn){
+  currentView=v;
+  document.querySelectorAll('.tool-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  ['growth','buildup','finance','readiness','execsummary'].forEach(n=>{
+    $('view-'+n).classList.toggle('active',n===v);
+  });
+  if(v==='execsummary') renderExecSummary();
+}
+
+// ── EXECUTIVE SUMMARY ────────────────────────────────────────────────────
+function renderExecSummary(){
+  const d=getDept();
+  const cap=computeCapex(d);
+  const hz=d.horizon, wacc=d.wacc/100, revGr=d.rev_gr/100, annDefer=d.defer_maint*0.11;
+  const sqT=volTraj(d.cur_vol,d.sq_vol,hz,true);
+  const rnT=volTraj(d.cur_vol,d.reno_vol,hz,false);
+  const nbT=volTraj(d.cur_vol,d.new_vol,hz,false);
+  const years=Array.from({length:hz+1},(_,i)=>i);
+  const rnCF=years.map(t=>t===0?-cap.totR:rnT[t]*d.rev_enc*Math.pow(1+revGr,t)/1e6-d.reno_opex*Math.pow(1.025,t)+annDefer);
+  const nbCF=years.map(t=>t===0?-cap.totN:nbT[t]*d.rev_enc*Math.pow(1+revGr,t)/1e6-d.new_opex*Math.pow(1.022,t)+annDefer);
+  const sqCF=years.map(t=>t===0?0:sqT[t]*d.rev_enc*Math.pow(1+revGr*.5,t)/1e6-d.sq_opex*Math.pow(1.03,t)-annDefer*Math.pow(1.05,t)-d.comply*Math.pow(1.03,t)-.1);
+  const cumR=cumSum(rnCF),cumN=cumSum(nbCF),cumS=cumSum(sqCF);
+  const rNPV=calcNPV(wacc,rnCF),nNPV=calcNPV(wacc,nbCF),sNPV=calcNPV(wacc,sqCF);
+  const rIRR=calcIRR(rnCF),nIRR=calcIRR(nbCF);
+  const pbR=payback(cumR),pbN=payback(cumN);
+  const annBurden=d.sq_opex+annDefer+d.comply+.1;
+
+  // Header
+  $('es-title').textContent=d.name+' — Capital Decision Analysis';
+  $('es-subtitle').textContent=`${d.building} · ${d.cc_code} · 10-Year NPV/IRR Model · WACC ${d.wacc}%`;
+
+  // Confidence
+  const conf=d.readiness.filter(r=>r.status==='confirmed').length;
+  const est=d.readiness.filter(r=>r.status==='estimated').length;
+  const need=d.readiness.filter(r=>r.status==='needed').length;
+  const score=Math.round((conf*100+est*50)/(conf+est+need));
+  $('es-confidence').textContent=score+'%';
+  $('es-conf-detail').textContent=`${conf} confirmed · ${est} estimated · ${need} needed`;
+
+  // Recommendation
+  const preferNew=nNPV>rNPV&&nNPV>0;
+  const preferReno=rNPV>nNPV&&rNPV>0;
+  let rec='';
+  if(preferNew) rec=`The model favors a <strong>New Build</strong> at ${fmtM(nNPV)} NPV vs. ${fmtM(rNPV)} for renovation — a ${fmtM(nNPV-rNPV)} premium justified by greater volume capture and lower long-term operating costs. Status quo is not financially defensible at ${fmtM(annBurden)}/yr in growing cost burden.`;
+  else if(preferReno) rec=`The model favors <strong>Renovation</strong> at ${fmtM(rNPV)} NPV with a shorter ${fmtYr(pbR)} payback. New build offers higher ceiling volume but at ${fmtM(cap.totN)} capex versus ${fmtM(cap.totR)} for renovation. Confirm land availability and program requirements before ruling out new construction.`;
+  else rec=`Both investment scenarios show positive NPV — renovation (${fmtM(rNPV)}) and new build (${fmtM(nNPV)}) — against a status quo cost burden of ${fmtM(Math.abs(sNPV))} over 10 years. Final recommendation pending confirmed volume, revenue, and construction cost data.`;
+  $('es-recommendation').innerHTML=rec;
+
+  // KPIs
+  const setK=(id,v,pos)=>{const el=$(id);el.textContent=fmtM(v);el.className='kpi-val '+(pos?'pos':'neg');};
+  setK('es-reno-npv',rNPV,rNPV>=0);
+  $('es-reno-irr').textContent=fmtPct(rIRR);
+  $('es-reno-pb').textContent=fmtYr(pbR);
+  $('es-reno-capex').textContent=fmtM(cap.totR);
+  setK('es-new-npv',nNPV,nNPV>=0);
+  $('es-new-irr').textContent=fmtPct(nIRR);
+  $('es-new-pb').textContent=fmtYr(pbN);
+  $('es-new-capex').textContent=fmtM(cap.totN);
+  $('es-sq-npv').textContent=fmtM(sNPV);
+  $('es-sq-ann').textContent=fmtM(annBurden);
+  $('es-sq-dr').textContent=fmtM(rNPV-sNPV);
+  $('es-sq-dn').textContent=fmtM(nNPV-sNPV);
+
+  // Volume impact
+  $('es-vol-sq').textContent=fmtN(d.sq_vol);
+  $('es-vol-rn').textContent=fmtN(d.reno_vol);
+  $('es-vol-nb').textContent=fmtN(d.new_vol);
+  const sqRev=d.sq_vol*d.rev_enc, rnRev=d.reno_vol*d.rev_enc, nbRev=d.new_vol*d.rev_enc;
+  $('es-revgap-rn').textContent='+'+(fmtD(rnRev-sqRev));
+  $('es-revgap-nb').textContent='+'+(fmtD(nbRev-sqRev));
+
+  // Strategic rationale bullets
+  const rationaleItems=[
+    {icon:'⚠',color:'var(--needed)',txt:`<strong>Space constraint:</strong> Current footprint cannot absorb the ~${fmtN(d.turnaway*52)} estimated annual deferred/lost encounters. Status quo forfeits ${fmtD((d.turnaway*52)*d.rev_enc)} in potential annual revenue.`},
+    {icon:'📈',color:'var(--growth)',txt:`<strong>Market opportunity:</strong> Neuro Oncology volume growing 4–6%/yr nationally driven by aging population and incidence trends. A new or renovated facility captures leakage currently going to competitors.`},
+    {icon:'🏗',color:'var(--estimated)',txt:`<strong>Deferred maintenance exposure:</strong> $${d.defer_maint}M confirmed deferred maintenance with an estimated $${(annDefer).toFixed(1)}M/yr run rate. Continued deferral compounds liability and code risk.`},
+    {icon:'💊',color:'var(--confirmed)',txt:`<strong>Infusion margin driver:</strong> Oncology drug margin is the primary value lever at an estimated $2,800 net/encounter. Expanding infusion bay capacity is the highest-ROI space investment in this service line.`},
+    {icon:'🔗',color:'var(--growth)',txt:`<strong>Downstream multiplier:</strong> Each clinic encounter generates ~2.4x in downstream revenue (imaging, infusion, surgical referrals). Volume growth compounds across the system.`},
+  ];
+  $('es-rationale').innerHTML=rationaleItems.map(item=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 10px;background:var(--gray-50);border-radius:5px;border-left:3px solid ${item.color};">
+      <span style="font-size:14px;flex-shrink:0;margin-top:1px;">${item.icon}</span>
+      <span style="font-size:11px;color:var(--gray-700);line-height:1.5;">${item.txt}</span>
+    </div>`).join('');
+
+  // Key risks
+  const risks=[
+    {sev:'HIGH',txt:'Net revenue per encounter unconfirmed — $100 swing = ~$500K NPV impact over 10 years'},
+    {sev:'HIGH',txt:'Construction $/SF based on benchmarks only — campus actuals could increase capex 15–25%'},
+    {sev:'MED',txt:`Reimbursement rate trend: ~(1.5)%/yr Medicare pressure reduces revenue projections annually`},
+    {sev:'MED',txt:`Volume capture assumptions (40% of leakage) are proxies — no turn-away data available`},
+    {sev:'LOW',txt:`WACC at 6.5% assumed — 1% change in discount rate shifts NPV by ~$1–2M`},
+  ];
+  const sevColor={HIGH:'var(--needed)',MED:'var(--estimated)',LOW:'var(--growth)'};
+  $('es-risks').innerHTML=risks.map(r=>`
+    <div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border:1px solid var(--border);border-radius:4px;background:var(--white);">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;letter-spacing:.07em;padding:2px 5px;border-radius:2px;background:${sevColor[r.sev]};color:white;white-space:nowrap;flex-shrink:0;">${r.sev}</span>
+      <span style="font-size:11px;color:var(--gray-700);line-height:1.4;">${r.txt}</span>
+    </div>`).join('');
+
+  // Critical data gaps (needed items only)
+  const gaps=d.readiness.filter(r=>r.status==='needed').slice(0,7);
+  $('es-gaps').innerHTML=gaps.map(g=>`
+    <div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;background:var(--needed-lt);border:1px solid var(--needed-bd);border-radius:4px;">
+      <span style="color:var(--needed);font-size:12px;flex-shrink:0;">!</span>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--gray-900);">${g.item}</div>
+        <div style="font-size:9px;color:var(--gray-500);margin-top:1px;">Owner: ${g.owner}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── PORTFOLIO ────────────────────────────────────────────────────────────
+function calcAll(){
+  // Run calc for each dept silently to populate cache
+  const orig=activeDeptId;
+  DEPARTMENTS.forEach(d=>{
+    activeDeptId=d.id;
+    const cap=computeCapex(d);
+    const hz=d.horizon, wacc=d.wacc/100, revGr=d.rev_gr/100, annDefer=d.defer_maint*0.11;
+    const sqT=volTraj(d.cur_vol,d.sq_vol,hz,true);
+    const rnT=volTraj(d.cur_vol,d.reno_vol,hz,false);
+    const nbT=volTraj(d.cur_vol,d.new_vol,hz,false);
+    const years=Array.from({length:hz+1},(_,i)=>i);
+    const rnCF=years.map(t=>t===0?-cap.totR:rnT[t]*d.rev_enc*Math.pow(1+revGr,t)/1e6-d.reno_opex*Math.pow(1.025,t)+annDefer);
+    const nbCF=years.map(t=>t===0?-cap.totN:nbT[t]*d.rev_enc*Math.pow(1+revGr,t)/1e6-d.new_opex*Math.pow(1.022,t)+annDefer);
+    const cumR=cumSum(rnCF),cumN=cumSum(nbCF);
+    const conf=d.readiness.filter(r=>r.status==='confirmed').length;
+    const est=d.readiness.filter(r=>r.status==='estimated').length;
+    const need=d.readiness.filter(r=>r.status==='needed').length;
+    const score=Math.round((conf*100+est*50)/(conf+est+need));
+    d._cache={rNPV:calcNPV(wacc,rnCF),nNPV:calcNPV(wacc,nbCF),rIRR:calcIRR(rnCF),nIRR:calcIRR(nbCF),pbR:payback(cumR),pbN:payback(cumN),score,cap};
+  });
+  activeDeptId=orig;
+}
+
+function showPortfolio(){
+  calcAll();
+  const grid=$('portfolio-grid');
+  grid.innerHTML=DEPARTMENTS.map(d=>{
+    const c=d._cache||{};
+    const rNPV=c.rNPV||0, nNPV=c.nNPV||0;
+    const score=c.score||0;
+    const nasf=d.nasf_confirmed?`${d.nasf.toFixed(0)} SF ✓`:`${d.nasf.toFixed(0)} SF (est.)`;
+    return `<div class="port-card" onclick="switchDept('${d.id}')" style="border-top:3px solid ${d.color}">
+      <div class="port-card-name">${d.name}</div>
+      <div class="port-card-bldg">${d.building} · ${d.cc_code} · ${nasf}</div>
+      <div class="port-card-kpis">
+        <div class="port-kpi"><div class="port-kpi-lbl">Reno NPV</div><div class="port-kpi-val ${rNPV>=0?'pos':'neg'}">${fmtM(rNPV)}</div></div>
+        <div class="port-kpi"><div class="port-kpi-lbl">New Build NPV</div><div class="port-kpi-val ${nNPV>=0?'pos':'neg'}">${fmtM(nNPV)}</div></div>
+        <div class="port-kpi"><div class="port-kpi-lbl">Reno IRR</div><div class="port-kpi-val">${fmtPct(c.rIRR)}</div></div>
+        <div class="port-kpi"><div class="port-kpi-lbl">Payback</div><div class="port-kpi-val">${fmtYr(c.pbN)}</div></div>
+      </div>
+      <div class="port-card-bar">
+        <span style="font-size:9px;color:var(--gray-400);">Data confidence</span>
+        <div class="conf-bar"><div class="conf-fill" style="width:${score}%"></div></div>
+        <span class="conf-pct">${score}%</span>
+      </div>
+    </div>`;
+  }).join('');
+  $('portfolio-view').classList.add('active');
+  $('dept-view').style.display='none';
+  $('tool-nav-wrap').style.display='none';
+}
+
+function hidePortfolio(){
+  $('portfolio-view').classList.remove('active');
+  $('dept-view').style.display='';
+  $('tool-nav-wrap').style.display='';
+}
+
+// ── ADD DEPT MODAL ───────────────────────────────────────────────────────
+let modalSLRows=[{name:'',cur:0,reno:0,newb:0,rev:0,constrained:true}];
+
+function addSLRow(){
+  modalSLRows.push({name:'',cur:0,reno:0,newb:0,rev:0,constrained:true});
+  renderModalSLRows();
+}
+
+function renderModalSLRows(){
+  $('modal-sl-rows').innerHTML=modalSLRows.map((sl,i)=>`
+    <div class="sl-row">
+      <input type="text" placeholder="Service type name" value="${sl.name}" oninput="modalSLRows[${i}].name=this.value">
+      <input type="number" placeholder="Current" value="${sl.cur||''}" class="cur-inp" oninput="modalSLRows[${i}].cur=parseInt(this.value)||0">
+      <input type="number" placeholder="Reno tgt" value="${sl.reno||''}" class="tgt-inp" oninput="modalSLRows[${i}].reno=parseInt(this.value)||0">
+      <input type="number" placeholder="New tgt" value="${sl.newb||''}" class="tgt-inp" oninput="modalSLRows[${i}].newb=parseInt(this.value)||0">
+      <input type="number" placeholder="$/enc" value="${sl.rev||''}" class="rev-inp" oninput="modalSLRows[${i}].rev=parseInt(this.value)||0">
+      <button class="sl-del" onclick="delSLRow(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+function delSLRow(i){
+  modalSLRows.splice(i,1);
+  if(modalSLRows.length===0) modalSLRows=[{name:'',cur:0,reno:0,newb:0,rev:0,constrained:true}];
+  renderModalSLRows();
+}
+
+function openModal(){
+  modalSLRows=[{name:'',cur:0,reno:0,newb:0,rev:0,constrained:true}];
+  renderModalSLRows();
+  $('modal').classList.add('open');
+}
+function closeModal(){ $('modal').classList.remove('open'); }
+
+function saveDept(){
+  const name=$('m-name').value.trim();
+  if(!name){alert('Please enter a department name.');return;}
+  const id='dept_'+Date.now();
+  const nasf=parseFloat($('m-nasf').value)||0;
+  const newDept={
+    id, name,
+    building:$('m-bldg').value||'Unknown Building',
+    cc_code:$('m-cc').value||'—',
+    color:'#'+Math.floor(Math.random()*0x666666+0x333333).toString(16),
+    nasf: nasf, nasf_confirmed: nasf>0,
+    target_sf:parseFloat($('m-tsf').value)||3000,
+    gross_factor:parseFloat($('m-gf').value)||1.32,
+    reno_sf:parseFloat($('m-rsf').value)||450,
+    new_sf:parseFloat($('m-nsf').value)||620,
+    sc_ae:parseFloat($('m-ae').value)||10,
+    sc_pm:parseFloat($('m-pm').value)||3,
+    sc_perm:parseFloat($('m-perm').value)||1.5,
+    sc_ffe:parseFloat($('m-ffe').value)||5,
+    sc_it:parseFloat($('m-it').value)||2.5,
+    sc_oc:parseFloat($('m-oc').value)||2,
+    reno_cont:parseFloat($('m-rc').value)||10,
+    new_cont:parseFloat($('m-nc').value)||8,
+    cur_vol:parseFloat($('m-cur-vol').value)||500,
+    sq_vol:parseFloat($('m-sq-vol').value)||550,
+    reno_vol:parseFloat($('m-reno-vol').value)||800,
+    new_vol:parseFloat($('m-new-vol').value)||1200,
+    turnaway:parseFloat($('m-ta').value)||0,
+    rev_enc:parseFloat($('m-rev-enc').value)||1000,
+    rev_gr:parseFloat($('m-rev-gr').value)||4.5,
+    reno_opex:parseFloat($('m-ro').value)||1.5,
+    new_opex:parseFloat($('m-no').value)||1.2,
+    sq_opex:parseFloat($('m-so').value)||1.8,
+    defer_maint:parseFloat($('m-dm').value)||20,
+    comply:parseFloat($('m-cy').value)||0.2,
+    wacc:parseFloat($('m-wacc').value)||6.5,
+    horizon:parseInt($('m-hz').value)||10,
+    ramp:parseInt($('m-ramp').value)||2,
+    service_lines:modalSLRows.filter(sl=>sl.name).map(sl=>({...sl,constrained:true})),
+    readiness:[
+      {item:'Current footprint (NASF)',value:nasf>0?`${nasf} SF`:'Not yet confirmed',status:nasf>0?'confirmed':'needed',owner:'Floor Plan',impact:'Anchors all SF calculations'},
+      {item:'Annual volume',value:'To be confirmed',status:'needed',owner:'Analytics / EHR',impact:'Foundation of revenue model'},
+      {item:'Net rev/encounter',value:'To be confirmed',status:'needed',owner:'Finance / Rev Cycle',impact:'Primary NPV driver'},
+      {item:'Construction $/SF',value:'Benchmark only',status:'needed',owner:'Capital Planning',impact:'Largest capex variable'},
+      {item:'FM operating cost',value:'To be confirmed',status:'needed',owner:'Facilities Mgmt',impact:'Status quo cost burden'},
+    ]
+  };
+  DEPARTMENTS.push(newDept);
+  activeDeptId=id;
+  closeModal();
+  renderDeptTabs();
+  renderPanel();
+  calc();
+}
+
+
+$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal();});
+$('tracker-modal').addEventListener('click',e=>{if(e.target===$('tracker-modal'))closeTracker();});
+
+// ── DATA TRACKER (cross-department) ─────────────────────────────────────
+let trackerFilter='all';
+
+function openTracker(){
+  renderTracker();
+  $('tracker-modal').classList.add('open');
+}
+function closeTracker(){ $('tracker-modal').classList.remove('open'); }
+
+function filterTracker(f, btn){
+  trackerFilter=f;
+  document.querySelectorAll('.tf').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  renderTracker();
+}
+
+function renderTracker(){
+  const statusMap={confirmed:'tag-c',estimated:'tag-e',needed:'tag-n'};
+  const statusLabel={confirmed:'✓ Confirmed',estimated:'~ Estimated',needed:'! Needed'};
+
+  let totalConf=0,totalEst=0,totalNeeded=0;
+  let html='';
+
+  DEPARTMENTS.forEach(d=>{
+    const items=trackerFilter==='all'
+      ? d.readiness
+      : d.readiness.filter(r=>r.status===trackerFilter);
+    if(items.length===0) return;
+
+    const dConf=d.readiness.filter(r=>r.status==='confirmed').length;
+    const dEst=d.readiness.filter(r=>r.status==='estimated').length;
+    const dNeed=d.readiness.filter(r=>r.status==='needed').length;
+    totalConf+=dConf; totalEst+=dEst; totalNeeded+=dNeed;
+
+    const score=Math.round((dConf*100+dEst*50)/(dConf+dEst+dNeed));
+    const nasf=d.nasf_confirmed?`${d.nasf.toFixed(0)} SF ✓`:`${d.nasf.toFixed(0)} SF (est.)`;
+
+    html+=`<div class="t-dept-hdr" onclick="switchDept('${d.id}');closeTracker();" style="cursor:pointer;" title="Click to open ${d.name}">
+      <div style="width:10px;height:10px;border-radius:50%;background:${d.color};flex-shrink:0;"></div>
+      <div class="t-dept-name">${d.name}</div>
+      <div style="font-size:10px;color:var(--gray-400);">${d.building} · ${d.cc_code} · ${nasf}</div>
+      <div class="t-dept-meta">
+        <span style="color:var(--confirmed);">${dConf} confirmed</span>
+        <span style="color:var(--estimated);">${dEst} estimated</span>
+        <span style="color:var(--needed);">${dNeed} needed</span>
+        <span style="font-weight:700;color:var(--gray-700);">${score}% confident</span>
+      </div>
+    </div>
+    <table class="tt">
+      <thead><tr><th>Data Point</th><th>Current Value</th><th>Status</th><th>Owner</th><th>Why It Matters</th></tr></thead>
+      <tbody>
+        ${items.map(r=>`<tr onclick="switchDept('${d.id}');closeTracker();" style="cursor:pointer;">
+          <td><strong style="font-size:11px;">${r.item}</strong></td>
+          <td style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;color:${r.status==='confirmed'?'var(--confirmed)':r.status==='needed'?'var(--needed)':'var(--estimated)'};">${r.value}</td>
+          <td><span class="tag ${statusMap[r.status]}">${statusLabel[r.status]}</span></td>
+          <td style="font-size:10px;color:var(--gray-600);">${r.owner}</td>
+          <td style="font-size:10px;color:var(--gray-500);">${r.impact}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  });
+
+  $('tracker-body').innerHTML=html||`<div style="padding:32px;text-align:center;color:var(--gray-400);font-size:13px;">No items match this filter across all departments.</div>`;
+
+  const total=totalConf+totalEst+totalNeeded;
+  const overallScore=total>0?Math.round((totalConf*100+totalEst*50)/total):0;
+  $('tracker-summary-hd').textContent=`${DEPARTMENTS.length} departments · ${overallScore}% overall confidence`;
+  $('tracker-ft-summary').innerHTML=`<strong>${totalConf}</strong> confirmed · <strong>${totalEst}</strong> estimated · <strong style="color:var(--needed);">${totalNeeded}</strong> needed · <strong>${overallScore}%</strong> overall model confidence`;
+}
+
+// ── INIT ────────────────────────────────────────────────────────────────
+renderDeptTabs();
+renderPanel();
+calc();
+</script>
+</body>
+</html>
